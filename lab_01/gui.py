@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-import logic as lgc
+import graphics_res as gres
 
 WIDGET_SHIFT = 3
 
@@ -39,6 +39,7 @@ class MainApplication:
     def widgets_treeview(self):
         self.columns = (TABLE_N_ID, TABLE_X_ID, TABLE_Y_ID)
         self.IDs = list() # Совпадают с "№"
+        self.IDs_current = 0
 
         self.table = ttk.Treeview(columns = self.columns, show="headings", height = 22)
         self.table.place(relx = 20 * WIDGET_SHIFT / MAIN_WIDTH, rely = 100 * WIDGET_SHIFT / MAIN_HEIGHT)
@@ -51,14 +52,27 @@ class MainApplication:
         for stroke in self.table.get_children(""):
             item = self.table.item(stroke)
 
-            if abs(float(item['values'][1]) - x) < lgc.EPS and abs(float(item['values'][2]) - y) < lgc.EPS :
+            if abs(float(item['values'][1]) - x) < gres.EPS and abs(float(item['values'][2]) - y) < gres.EPS :
                 return True
         
         return False
+    
+    def treeview_all_elements(self):
+        points = []
+
+        for stroke in self.table.get_children(""):
+            item = self.table.item(stroke)
+            data = list(map(float, item["values"][1::]))
+
+            points.append(data)
+        
+        return points
 
     def treeview_add(self, x: float, y: float) -> bool:
-        self.table.insert("", tk.END, len(self.IDs), values = (len(self.IDs) + 1, x, y))
-        self.IDs.append(len(self.IDs))
+        self.table.insert("", tk.END, self.IDs_current, values = (self.IDs_current + 1, x, y))
+        self.IDs.append(self.IDs_current)
+
+        self.IDs_current += 1
 
     def treeview_delete(self, i: int) -> bool:
         if i not in self.IDs:
@@ -171,8 +185,13 @@ class MainApplication:
     
     # ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD
 
+    def calculate(self):
+        points = self.treeview_all_elements()
+
+        result_window = gres.GraphicsSolution(points)
+
     def widgets_calculate(self):
-        self.addbutton = tk.Button(text="Получить результат", width=BUTTON_WIDTH, height=BUTTON_HEIGHT)
+        self.addbutton = tk.Button(text="Получить результат", width=BUTTON_WIDTH, height=BUTTON_HEIGHT, command = self.calculate)
         self.addbutton.place(relx = 20 * WIDGET_SHIFT / MAIN_WIDTH, rely = 320 * WIDGET_SHIFT / MAIN_HEIGHT)
 
     def __init__(self) -> None:
