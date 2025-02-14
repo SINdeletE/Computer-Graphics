@@ -5,11 +5,9 @@ import processing as pcs
 EPS = 1e-8
 
 TRIANGLE_COLOR = "blue"
+CIRCLE_COLOR = "red"
 
 class GraphicsSolution:
-    
-
-
     def graphics_triangle_draw(self, points: list):
         ax = plt.gca()
 
@@ -25,21 +23,44 @@ class GraphicsSolution:
         min_y = min(p[1] for p in points)
         max_y = max(p[1] for p in points)
 
-        ax.set_xlim(min_x - 1, max_x + 1)
-        ax.set_ylim(min_y - 1, max_y + 1)
+        # min_lim = min(min(p[0], p[1]) for p in points)
+        # max_lim = max(max(p[0], p[1]) for p in points)
+        delta = max(max_x - min_x, max_y - min_y)
+
+        ax.set_xlim(min_x, min_x + delta)
+        ax.set_ylim(min_y, min_y + delta)
+
+        # ax.set_xlim(min_lim, max_lim)
+        # ax.set_ylim(min_lim, max_lim)
     
     def graphics_points_draw(self, points: list):
         for p in points:
             plt.scatter(p[0], p[1], label=f"{p}")
             plt.text(p[0], p[1], f'({p[0]:.2g}, {p[1]:.2g})', fontsize=10, ha='right')
+    
+    def graphics_circle_draw(self, center: list, radius: float):
+        ax = plt.gca()
+
+        circle = plt.Circle(center, radius, color=CIRCLE_COLOR, fill=False)
+        ax.add_patch(circle)
 
     def __init__(self, points: list):
+
+        fig = plt.gcf()
+        fig.set_size_inches(18, 18)
+
         plt.title("Результат работы программы")
         plt.xlabel("x") 
         plt.ylabel("y") 
-        plt.grid() # включение отображение сетки
+        plt.grid(which='major') # включение отображение сетки
 
         self.graphics_triangle_draw(points)
         self.graphics_points_draw(points)
+
+        circumcircle_center, R = pcs.triangle_circumcircle(points)
+
+        print(circumcircle_center, R)
+
+        self.graphics_circle_draw(circumcircle_center, R)
 
         plt.show()

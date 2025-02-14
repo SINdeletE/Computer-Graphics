@@ -3,7 +3,7 @@ from math import *
 EPS = 1e-8
 
 def triangle_side(p1: list, p2: list):
-    return (p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2
+    return sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2)
 
 def triangle_square(points: list):
     a = triangle_side(points[0], points[1])
@@ -20,22 +20,95 @@ def triangle_circumcircle_radius(points: list, s: float):
 
     return a * b * c / 4 / s
 
+# Показывает положение 3-й точки относительно основание: -1, если ниже, 1 в остальных случаях
+def triangle_point_polar(p_last: list, p_max_x: list, k_base: float):
+    shifted_p_last = [p_max_x[0], k_base * (p_max_x[0] - p_last[0]) + p_last[1]] # Смещённая точка p_last (Смещение к p_max_x по Ox) 
+
+    if shifted_p_last[1] - p_max_x[1] < -EPS:
+        return -1
+    else:
+        return 1
+
 # VECTOR VECTOR VECTOR VECTOR VECTOR VECTOR VECTOR VECTOR VECTOR VECTOR
 
+def vector_not(v: list):
+    return list(map(lambda a: -a, v))
+
 def vector_module(v: list):
-    return v[0] ** 2 + v[1] ** 2
+    return sqrt(v[0] ** 2 + v[1] ** 2)
 
 def vectors_cos(v1: list, v2: list):
     return (v1[0] * v2[0] + v1[1] * v2[1]) / vector_module(v1) / vector_module(v2)
 
+def vector_from_points(p1: list, p2: list):
+    return [p2[0] - p1[0], p2[1] - p1[1]]
+
+def vector_k(v: list, k: float):
+    return list(map(lambda param: k * param, v))
+
 # VECTOR VECTOR VECTOR VECTOR VECTOR VECTOR VECTOR VECTOR VECTOR VECTOR
+
+# POINT POINT POINT POINT POINT POINT POINT POINT POINT POINT POINT POINT
+
+def point_vector_sum(point: list, vector: list):
+    return [point[0] + vector[0], point[1] + vector[1]]
+
+# POINT POINT POINT POINT POINT POINT POINT POINT POINT POINT POINT POINT
 
 def sin_from_cos(cosinus: float):
     return sqrt(1 - cosinus ** 2)
 
-def triangle_circumcircle_center(points: list):
+# Функция, вычисляющая информация об описанной окружности по 3-м точкам
+def triangle_circumcircle(points: list):
     R = triangle_circumcircle_radius(points, triangle_square(points))
+    M = [[], []]
 
-    # Вычисления будут проходить относительно точек с индексами 0 и 1
+    p_min_x = min(points, key=lambda p: p[0])
+    p_max_x = max(points, key=lambda p: p[0])
+    p_last = []
+    for p in points:
+        if p != p_min_x and p != p_max_x:
+            p_last = p
 
+            break
     
+    # Векторы от 3-й точки до p_max_x и p_min_x
+    vector_last_to_max = vector_from_points(p_last, p_max_x)
+    vector_last_to_min = vector_from_points(p_last, p_min_x)
+
+    # Вычисления будут проходить относительно точек с min_x и min_y
+
+    vector_base = vector_from_points(p_min_x, p_max_x) # Вектор p_min_x -> p_max_x
+    k_base = (p_max_x[1] - p_min_x[1]) / (p_max_x[0] - p_min_x[0]) # Угол наклона вектора p_min_x -> p_max_x
+
+    # Вектор до основания серединного перпендикуляра
+    vector_to_perp_base = vector_k(vector_base, 0.5)
+
+    if abs(k_base) > EPS:
+        k_perp = -1 / k_base # Коэффициент k = dy/dx - угол наклона серединного перпендикуляра
+    perp = [] # Серединный перпендикуляр
+    perp_length = sqrt(R ** 2 - vector_module(vector_base) ** 2 / 4) # Длина серединного перпендикуляра
+
+    if abs(p_min_x[1] - p_max_x[1]) < EPS: # Если k -> inf
+        perp = [0, perp_length]
+    else:
+        perp = [1, k_perp * 1] # Перпендикуляр произвольной длины
+        perp = list(map(lambda n: n / vector_module(perp) * perp_length, perp)) # Серединный перпендикуляр, где направление y неизвестно
+        if perp[1] < -EPS:
+            perp = vector_not(perp)
+
+    # ------ДОП. УСЛОВИЯ
+
+    if triangle_point_polar(p_last, p_max_x, k_base) == -1: # Смотрим расположение 3-й другой точки и основания
+        perp = vector_not(perp)
+
+    p_last_cos = vectors_cos(vector_last_to_max, vector_last_to_min)
+    if p_last_cos < -EPS:
+        perp = vector_not(perp)
+
+    # ------
+
+    result = point_vector_sum(p_min_x, vector_to_perp_base)
+    result = point_vector_sum(result, perp)
+
+    return result, R
