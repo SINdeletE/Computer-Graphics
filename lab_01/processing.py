@@ -87,7 +87,12 @@ def triangle_circumcircle(points: list):
     if abs(k_base) > EPS:
         k_perp = -1 / k_base # Коэффициент k = dy/dx - угол наклона серединного перпендикуляра
     perp = [] # Серединный перпендикуляр
-    perp_length = sqrt(R ** 2 - vector_module(vector_base) ** 2 / 4) # Длина серединного перпендикуляра
+
+    perp_length = R ** 2 - vector_module(vector_base) ** 2 / 4
+    if abs(perp_length) > EPS:
+        perp_length = sqrt(perp_length) # Длина серединного перпендикуляра
+    else:
+        perp_length = 0
 
     if abs(p_min_x[1] - p_max_x[1]) < EPS: # Если k -> inf
         perp = [0, perp_length]
