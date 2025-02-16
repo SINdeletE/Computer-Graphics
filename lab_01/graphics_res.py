@@ -2,12 +2,11 @@ import matplotlib.pyplot as plt
 import matplotlib.lines as pltlines
 import processing as pcs
 
-EPS = 1e-8
-
 TRIANGLE_COLOR = "blue"
 CIRCLE_COLOR = "red"
+POINTS_COLOR = "green"
 
-RADIUS_SCALE = 1.05
+RADIUS_SCALE = 1.1
 
 class GraphicsSolution:
     def graphics_triangle_draw(self, points: list):
@@ -21,7 +20,7 @@ class GraphicsSolution:
     
     def graphics_points_draw(self, points: list):
         for p in points:
-            plt.scatter(p[0], p[1], label=f"{p}")
+            plt.scatter(p[0], p[1], label=f"{p}", color=POINTS_COLOR)
             plt.text(p[0], p[1], f'({p[0]:.2g}, {p[1]:.2g})', fontsize=10, ha='right')
     
     def graphics_circle_draw(self, center: list, radius: float):

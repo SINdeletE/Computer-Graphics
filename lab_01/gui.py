@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import graphics_res as gres
+import processing as pcs
 
 WIDGET_SHIFT = 3
 
@@ -52,7 +53,7 @@ class MainApplication:
         for stroke in self.table.get_children(""):
             item = self.table.item(stroke)
 
-            if abs(float(item['values'][1]) - x) < gres.EPS and abs(float(item['values'][2]) - y) < gres.EPS :
+            if abs(float(item['values'][1]) - x) < pcs.EPS and abs(float(item['values'][2]) - y) < pcs.EPS :
                 return True
         
         return False
@@ -91,7 +92,7 @@ class MainApplication:
     # MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG
 
     def widgets_result_msg(self):
-        self.restxt = tk.Entry(width = 30)
+        self.restxt = tk.Entry(width = 100)
         self.restxt.insert(0, "Результаты действий")
         self.restxt.place(relx = 20 * WIDGET_SHIFT / MAIN_WIDTH, rely = 300 * WIDGET_SHIFT / MAIN_HEIGHT)
 
@@ -188,7 +189,22 @@ class MainApplication:
     def calculate(self):
         points = self.treeview_all_elements()
 
-        result_window = gres.GraphicsSolution(points)
+        code, triangle_points = pcs.triangle_parse(points)
+        match code:
+            case pcs.PARSE_ERROR_POINTS_COUNT:
+                self.res_msg("Недостаточно точек для создания треугольника")
+
+                return False
+            case pcs.PARSE_ERROR_NO_VALID_TRIANGLE:
+                self.res_msg("Нет точек для создания треугольника")
+
+                return False
+
+        result_window = gres.GraphicsSolution(triangle_points)
+
+        self.res_msg("Найден подходящий треугольник")
+
+        return True
 
     def widgets_calculate(self):
         self.addbutton = tk.Button(text="Получить результат", width=BUTTON_WIDTH, height=BUTTON_HEIGHT, command = self.calculate)

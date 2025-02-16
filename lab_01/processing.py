@@ -1,5 +1,10 @@
 from math import *
 
+#ERRORS
+PARSE_OK = 0
+PARSE_ERROR_POINTS_COUNT = 1
+PARSE_ERROR_NO_VALID_TRIANGLE = 2
+
 EPS = 1e-8
 
 def triangle_side(p1: list, p2: list):
@@ -94,7 +99,7 @@ def triangle_circumcircle(points: list):
     else:
         perp_length = 0
 
-    if abs(p_min_x[1] - p_max_x[1]) < EPS: # Если k -> inf
+    if abs(p_min_x[1] - p_max_x[1]) < EPS: # Если k_perp -> inf
         perp = [0, perp_length]
     else:
         perp = [1, k_perp * 1] # Перпендикуляр произвольной длины
@@ -117,3 +122,42 @@ def triangle_circumcircle(points: list):
     result = point_vector_sum(result, perp)
 
     return result, R
+
+def circle_square(radius: float):
+    return pi * radius * radius
+
+# ----------------------------------------------------------
+
+# Перебор точек на наличие 
+
+def triangle_parse_compare_func(circle_square: float, triangle_square: float):
+    return circle_square - triangle_square
+
+def triangle_parse(points: list):
+    delta = None # Разница между площадью описанной окружности и площади треугольника
+    delta_points = None
+
+    if len(points) < 3:
+        return PARSE_ERROR_POINTS_COUNT, delta_points
+
+    for i in range(len(points) - 2):
+        for j in range(i + 1, len(points) - 1):
+            for k in range(i + 2, len(points)):
+                triangle_points = [points[i], points[j], points[k]]
+
+                if triangle_square(triangle_points) > EPS: # Можно ли вообще составить треугольник из данных точек
+                    t_square = triangle_square(triangle_points)
+                    c_square = circle_square(triangle_circumcircle_radius(triangle_points, t_square))
+                    
+                    current_delta = triangle_parse_compare_func(c_square, t_square)
+
+                    if delta is None or (current_delta - delta) > EPS:
+                        delta = current_delta
+                        delta_points = triangle_points
+    
+    if delta is None:
+        return PARSE_ERROR_NO_VALID_TRIANGLE, delta_points
+
+    return PARSE_OK, delta_points
+
+                    
