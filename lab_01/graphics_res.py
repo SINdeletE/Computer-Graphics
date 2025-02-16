@@ -1,3 +1,6 @@
+import tkinter as tk
+from tkinter import ttk
+
 import matplotlib.pyplot as plt
 import matplotlib.lines as pltlines
 import processing as pcs
@@ -7,6 +10,34 @@ CIRCLE_COLOR = "red"
 POINTS_COLOR = "green"
 
 RADIUS_SCALE = 1.1
+
+RESULT_WIDTH = 200
+RESULT_HEIGHT = 200
+RESULT_DELTA = 5
+
+class ResultWindow:
+    def labels_create(self, points: list):
+        self.label_1 = ttk.Label(self.res_root, text="Треугольник был найден!")
+        self.label_1.pack(anchor="center", expand=1)
+
+        self.label_2 = ttk.Label(self.res_root, text="Точки:")
+        self.label_2.pack(anchor="center", expand=1)
+
+        self.label_p1 = ttk.Label(self.res_root, text=f"{points[0]}")
+        self.label_p1.pack(anchor="center", expand=1)
+
+        self.label_p2 = ttk.Label(self.res_root, text=f"{points[1]}")
+        self.label_p2.pack(anchor="center", expand=1)
+
+        self.label_p3 = ttk.Label(self.res_root, text=f"{points[2]}")
+        self.label_p3.pack(anchor="center", expand=1)
+
+    def __init__(self, points: list) -> None:
+        self.res_root = tk.Tk()
+        self.res_root.title("Результаты вычислений")
+        self.res_root.geometry(f"{RESULT_WIDTH}x{RESULT_HEIGHT}")
+
+        self.labels_create(points)
 
 class GraphicsSolution:
     def graphics_triangle_draw(self, points: list):
@@ -63,5 +94,7 @@ class GraphicsSolution:
         self.graphics_points_draw(points)
         self.graphics_circle_draw(circumcircle_center, R)
         self.graphics_scale(points, circumcircle_center, R)
+
+        res = ResultWindow(points)
 
         plt.show()

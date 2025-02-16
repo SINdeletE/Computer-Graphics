@@ -159,5 +159,3 @@ def triangle_parse(points: list):
         return PARSE_ERROR_NO_VALID_TRIANGLE, delta_points
 
     return PARSE_OK, delta_points
-
-                    
