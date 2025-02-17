@@ -142,7 +142,7 @@ def triangle_parse(points: list):
 
     for i in range(len(points) - 2):
         for j in range(i + 1, len(points) - 1):
-            for k in range(i + 2, len(points)):
+            for k in range(j + 1, len(points)):
                 triangle_points = [points[i], points[j], points[k]]
 
                 if triangle_square(triangle_points) > EPS: # Можно ли вообще составить треугольник из данных точек
