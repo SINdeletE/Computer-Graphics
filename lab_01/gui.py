@@ -86,6 +86,12 @@ class MainApplication:
         self.IDs = self.IDs[:id_index:] + self.IDs[id_index + 1:len(self.IDs):]
 
         return True
+    
+    def treeview_delete_all(self):
+        for i in range(len(self.IDs) - 1, -1, -1):
+            self.treeview_delete(self.IDs[i])
+        
+        return True
 
     # TABLE TABLE TABLE TABLE TABLE TABLE TABLE TABLE TABLE
 
@@ -107,7 +113,7 @@ class MainApplication:
     def point_delete(self) -> bool:
         i = 0
 
-        entered = self.deleteentry_n.get()
+        entered = self.delete_entry_n.get()
         if not(is_int(entered)):
             self.res_msg("Неправильное значение №")
 
@@ -129,13 +135,24 @@ class MainApplication:
 
         return True
 
-    def widgets_points_delete(self):
-        self.addbutton = tk.Button(text="Удалить точку", width=BUTTON_WIDTH, height=BUTTON_HEIGHT, command = self.point_delete)
-        self.addbutton.place(relx = 180 * WIDGET_SHIFT / MAIN_WIDTH, rely = 40 * WIDGET_SHIFT / MAIN_HEIGHT)
+    def points_delete_all(self) -> bool:
+        self.treeview_delete_all()
 
-        self.deleteentry_n = tk.Entry(textvariable="№", width=ENTRY_WIDTH)
-        self.deleteentry_n.insert(0, "№")
-        self.deleteentry_n.place(relx = 20 * WIDGET_SHIFT / MAIN_WIDTH, rely = 40 * WIDGET_SHIFT / MAIN_HEIGHT)
+        self.res_msg("Все точки в таблице были удалены")
+
+        return False
+
+    def widgets_points_delete(self):
+        self.delete_button = tk.Button(text="Удалить точку", width=BUTTON_WIDTH, height=BUTTON_HEIGHT, command = self.point_delete)
+        self.delete_button.place(relx = 180 * WIDGET_SHIFT / MAIN_WIDTH, rely = 40 * WIDGET_SHIFT / MAIN_HEIGHT)
+
+        self.delete_entry_n = tk.Entry(textvariable="№", width=ENTRY_WIDTH)
+        self.delete_entry_n.insert(0, "№")
+        self.delete_entry_n.place(relx = 20 * WIDGET_SHIFT / MAIN_WIDTH, rely = 40 * WIDGET_SHIFT / MAIN_HEIGHT)
+
+    def widgets_points_delete_all(self):
+        self.delete_all_button = tk.Button(text="Удалить все точки", width=BUTTON_WIDTH, height=BUTTON_HEIGHT, command = self.points_delete_all)
+        self.delete_all_button.place(relx = 20 * WIDGET_SHIFT / MAIN_WIDTH, rely = 60 * WIDGET_SHIFT / MAIN_HEIGHT)
 
     # DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE
 
@@ -219,6 +236,7 @@ class MainApplication:
         self.widgets_result_msg()
         self.widgets_points_add()
         self.widgets_points_delete()
+        self.widgets_points_delete_all()
         self.widgets_calculate()
 
         self.root.mainloop()

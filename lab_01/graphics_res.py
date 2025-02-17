@@ -11,8 +11,8 @@ POINTS_COLOR = "green"
 
 RADIUS_SCALE = 1.1
 
-RESULT_WIDTH = 200
-RESULT_HEIGHT = 200
+RESULT_WIDTH = 400
+RESULT_HEIGHT = 300
 RESULT_DELTA = 5
 
 class ResultWindow:
@@ -63,19 +63,19 @@ class GraphicsSolution:
     def graphics_scale(self, points: list, center: list, radius: float):
         ax = plt.gca()
 
-        # min_x = min(p[0] for p in points)
-        # max_x = max(p[0] for p in points)
+        min_x = min(p[0] for p in points)
+        max_x = max(p[0] for p in points)
 
-        # min_y = min(p[1] for p in points)
-        # max_y = max(p[1] for p in points)
+        min_y = min(p[1] for p in points)
+        max_y = max(p[1] for p in points)
 
-        # delta = max(max_x - min_x, max_y - min_y)
+        delta = max(max_x - min_x, max_y - min_y)
 
-        # ax.set_xlim(min_x, min_x + delta)
-        # ax.set_ylim(min_y, min_y + delta)
+        ax.set_xlim(min_x, min_x + delta)
+        ax.set_ylim(min_y, min_y + delta)
 
-        ax.set_xlim(center[0] - radius * RADIUS_SCALE, center[0] + radius * RADIUS_SCALE)
-        ax.set_ylim(center[1] - radius * RADIUS_SCALE, center[1] + radius * RADIUS_SCALE)
+        # ax.set_xlim(center[0] - radius * RADIUS_SCALE, center[0] + radius * RADIUS_SCALE)
+        # ax.set_ylim(center[1] - radius * RADIUS_SCALE, center[1] + radius * RADIUS_SCALE)
 
 
     def __init__(self, points: list):
