@@ -83,11 +83,14 @@ class MainApplication:
         return False
     
     def treeview_all_elements(self):
+        numbers = []
         points = []
 
         for stroke in self.table.get_children(""):
             item = self.table.item(stroke)
-            data = list(map(float, item["values"][1::]))
+
+            data = item['values']
+            data = [data[0]] + list(map(float, data[1::])) # Перевод координат точек во float
 
             points.append(data)
         
@@ -228,20 +231,22 @@ class MainApplication:
     # ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD
 
     def calculate(self):
-        points = self.treeview_all_elements()
+        data = self.treeview_all_elements()
+        points = list(map(lambda item: item[1::], data))
+        numbers = list(map(lambda item: item[0], data))
 
-        code, triangle_points = pcs.triangle_parse(points)
+        code, triangle_points, triangle_numbers = pcs.triangle_parse(points, numbers)
         match code:
             case pcs.PARSE_ERROR_POINTS_COUNT:
                 self.res_msg("Недостаточно точек для создания треугольника")
 
                 return False
             case pcs.PARSE_ERROR_NO_VALID_TRIANGLE:
-                self.res_msg("Нет точек для создания треугольника")
+                self.res_msg("Все точки лежат на одной прямой")
 
                 return False
 
-        result_window = gres.GraphicsSolution(triangle_points)
+        result_window = gres.GraphicsSolution(triangle_points, triangle_numbers)
 
         self.res_msg("Найден подходящий треугольник")
 

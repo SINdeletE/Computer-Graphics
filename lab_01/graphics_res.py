@@ -16,28 +16,28 @@ RESULT_HEIGHT = 300
 RESULT_DELTA = 5
 
 class ResultWindow:
-    def labels_create(self, points: list):
+    def labels_create(self, points: list, numbers: list):
         self.label_1 = ttk.Label(self.res_root, text="Треугольник был найден!")
         self.label_1.pack(anchor="center", expand=1)
 
         self.label_2 = ttk.Label(self.res_root, text="Точки:")
         self.label_2.pack(anchor="center", expand=1)
 
-        self.label_p1 = ttk.Label(self.res_root, text=f"{points[0]}")
+        self.label_p1 = ttk.Label(self.res_root, text=f"№{numbers[0]} {points[0]}")
         self.label_p1.pack(anchor="center", expand=1)
 
-        self.label_p2 = ttk.Label(self.res_root, text=f"{points[1]}")
+        self.label_p2 = ttk.Label(self.res_root, text=f"№{numbers[1]} {points[1]}")
         self.label_p2.pack(anchor="center", expand=1)
 
-        self.label_p3 = ttk.Label(self.res_root, text=f"{points[2]}")
+        self.label_p3 = ttk.Label(self.res_root, text=f"№{numbers[2]} {points[2]}")
         self.label_p3.pack(anchor="center", expand=1)
 
-    def __init__(self, points: list) -> None:
+    def __init__(self, points: list, numbers: list) -> None:
         self.res_root = tk.Tk()
         self.res_root.title("Результаты вычислений")
         self.res_root.geometry(f"{RESULT_WIDTH}x{RESULT_HEIGHT}")
 
-        self.labels_create(points)
+        self.labels_create(points, numbers)
 
 class GraphicsSolution:
     def graphics_triangle_draw(self, points: list):
@@ -49,10 +49,10 @@ class GraphicsSolution:
 
                 ax.add_line(line)
     
-    def graphics_points_draw(self, points: list):
-        for p in points:
-            plt.scatter(p[0], p[1], label=f"{p}", color=POINTS_COLOR)
-            plt.text(p[0], p[1], f'({p[0]:.2g}, {p[1]:.2g})', fontsize=10, ha='right')
+    def graphics_points_draw(self, points: list, numbers: list):
+        for i in range(len(points)):
+            plt.scatter(points[i][0], points[i][1], color=POINTS_COLOR)
+            plt.text(points[i][0], points[i][1], f'№{numbers[i]} ({points[i][0]:.2g}, {points[i][1]:.2g})', fontsize=10, ha='right')
     
     def graphics_circle_draw(self, center: list, radius: float):
         ax = plt.gca()
@@ -63,21 +63,21 @@ class GraphicsSolution:
     def graphics_scale(self, points: list, center: list, radius: float):
         ax = plt.gca()
 
-        min_x = min(p[0] for p in points)
-        max_x = max(p[0] for p in points)
+        # min_x = min(p[0] for p in points)
+        # max_x = max(p[0] for p in points)
 
-        min_y = min(p[1] for p in points)
-        max_y = max(p[1] for p in points)
+        # min_y = min(p[1] for p in points)
+        # max_y = max(p[1] for p in points)
 
-        delta = max(max_x - min_x, max_y - min_y)
+        # delta = max(max_x - min_x, max_y - min_y)
 
-        ax.set_xlim(min_x, min_x + delta)
-        ax.set_ylim(min_y, min_y + delta)
+        # ax.set_xlim(min_x, min_x + delta)
+        # ax.set_ylim(min_y, min_y + delta)
 
-        # ax.set_xlim(center[0] - radius * RADIUS_SCALE, center[0] + radius * RADIUS_SCALE)
-        # ax.set_ylim(center[1] - radius * RADIUS_SCALE, center[1] + radius * RADIUS_SCALE)
+        ax.set_xlim(center[0] - radius * RADIUS_SCALE, center[0] + radius * RADIUS_SCALE)
+        ax.set_ylim(center[1] - radius * RADIUS_SCALE, center[1] + radius * RADIUS_SCALE)
 
-    def __init__(self, points: list):
+    def __init__(self, points: list, numbers: list): # Передаём только координаты, а номера точек отдельно
 
         fig = plt.gcf()
         fig.set_size_inches(18, 18)
@@ -90,10 +90,10 @@ class GraphicsSolution:
         circumcircle_center, R = pcs.triangle_circumcircle(points)
 
         self.graphics_triangle_draw(points)
-        self.graphics_points_draw(points)
+        self.graphics_points_draw(points, numbers)
         self.graphics_circle_draw(circumcircle_center, R)
         self.graphics_scale(points, circumcircle_center, R)
 
-        res = ResultWindow(points)
+        res = ResultWindow(points, numbers)
 
         plt.show()

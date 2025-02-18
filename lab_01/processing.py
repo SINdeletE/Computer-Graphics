@@ -5,10 +5,16 @@ PARSE_OK = 0
 PARSE_ERROR_POINTS_COUNT = 1
 PARSE_ERROR_NO_VALID_TRIANGLE = 2
 
-EPS = 1e-8
+EPS = 1e-4
 
 def triangle_side(p1: list, p2: list):
     return sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2)
+
+def float_zero_converter(num: float): # Помогает обнаружить нулевое значение float
+    if abs(num) < EPS:
+        return 0.0
+    
+    return num
 
 def triangle_square(points: list):
     a = triangle_side(points[0], points[1])
@@ -16,7 +22,11 @@ def triangle_square(points: list):
     c = triangle_side(points[1], points[2])
     p = (a + b + c) / 2
 
-    return sqrt(p * (p - a) * (p - b) * (p - c))
+    multi_1 = float_zero_converter(p - a)
+    multi_2 = float_zero_converter(p - b)
+    multi_3 = float_zero_converter(p - c)
+
+    return sqrt(p * multi_1 * multi_2 * multi_3)
 
 def triangle_circumcircle_radius(points: list, s: float):
     a = triangle_side(points[0], points[1])
@@ -133,12 +143,13 @@ def circle_square(radius: float):
 def triangle_parse_compare_func(circle_square: float, triangle_square: float):
     return circle_square - triangle_square
 
-def triangle_parse(points: list):
+def triangle_parse(points: list, numbers: list):
     delta = None # Разница между площадью описанной окружности и площади треугольника
     delta_points = None
+    delta_numbers = None
 
     if len(points) < 3:
-        return PARSE_ERROR_POINTS_COUNT, delta_points
+        return PARSE_ERROR_POINTS_COUNT, delta_points, delta_numbers
 
     for i in range(len(points) - 2):
         for j in range(i + 1, len(points) - 1):
@@ -154,8 +165,9 @@ def triangle_parse(points: list):
                     if delta is None or (current_delta - delta) > EPS:
                         delta = current_delta
                         delta_points = triangle_points
+                        delta_numbers = [numbers[i], numbers[j], numbers[k]]
     
     if delta is None:
-        return PARSE_ERROR_NO_VALID_TRIANGLE, delta_points
+        return PARSE_ERROR_NO_VALID_TRIANGLE, delta_points, delta_numbers
 
-    return PARSE_OK, delta_points
+    return PARSE_OK, delta_points, delta_numbers
