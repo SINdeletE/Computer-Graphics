@@ -14,6 +14,9 @@ BUTTON_HEIGHT = 1
 ENTRY_WIDTH = 10
 ENTRY_HEIGHT = 1
 
+TASK_WIDTH = 700
+TASK_HEIGHT = 300
+
 TABLE_N_ID = "№"
 TABLE_X_ID = "X"
 TABLE_Y_ID = "Y"
@@ -34,7 +37,28 @@ def is_float(text: str) -> bool:
 
     return True
 
+class TaskWindow:
+    def task_label_create(self):
+        task = "26. На плоскости дано множество точек. Найти такой треугольник с вершинами в этих точках, у которого разность площадей описанного круга и треугольника максимальны"
+
+        self.task_label = ttk.Label(self.task_root, text=task, wraplength=TASK_WIDTH)
+        self.task_label.pack(anchor="center", expand=1)
+
+    def __init__(self) -> None:
+        self.task_root = tk.Tk()
+        self.task_root.title("Задание")
+        self.task_root.geometry(f"{TASK_WIDTH}x{TASK_HEIGHT}")
+
+        self.task_label_create()
+
 class MainApplication:
+    def task_window_create(self):
+        self.task_window = TaskWindow()
+    
+    def widgets_task(self):
+        self.task_button = tk.Button(text="Условие задачи", width=BUTTON_WIDTH, height=BUTTON_HEIGHT, command = self.task_window_create)
+        self.task_button.place(relx = 300 * WIDGET_SHIFT / MAIN_WIDTH, rely = 20 * WIDGET_SHIFT / MAIN_HEIGHT)
+
     # TABLE TABLE TABLE TABLE TABLE TABLE TABLE TABLE TABLE
 
     def widgets_treeview(self):
@@ -232,6 +256,7 @@ class MainApplication:
         self.root.title("Лабораторная работа №1")
         self.root.geometry(f"{MAIN_WIDTH}x{MAIN_HEIGHT}")
 
+        self.widgets_task()
         self.widgets_treeview()
         self.widgets_result_msg()
         self.widgets_points_add()

@@ -77,7 +77,6 @@ class GraphicsSolution:
         # ax.set_xlim(center[0] - radius * RADIUS_SCALE, center[0] + radius * RADIUS_SCALE)
         # ax.set_ylim(center[1] - radius * RADIUS_SCALE, center[1] + radius * RADIUS_SCALE)
 
-
     def __init__(self, points: list):
 
         fig = plt.gcf()
