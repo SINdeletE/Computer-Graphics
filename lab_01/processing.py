@@ -122,7 +122,7 @@ def triangle_circumcircle(points: list):
     if triangle_point_polar(p_last, p_max_x, k_base) == -1: # Смотрим расположение 3-й другой точки и основания
         perp = vector_not(perp)
 
-    p_last_cos = vectors_cos(vector_last_to_max, vector_last_to_min)
+    p_last_cos = vectors_cos(vector_last_to_max, vector_last_to_min) # Смотрим на косинус оставшейся точки
     if p_last_cos < -EPS:
         perp = vector_not(perp)
 

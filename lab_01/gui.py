@@ -66,6 +66,9 @@ class MainApplication:
         self.IDs = list() # Совпадают с "№"
         self.IDs_current = 0
 
+        # self.style = ttk.Style()
+        # self.style.configure("Treeview", font=("Arial", 12))
+
         self.table = ttk.Treeview(columns = self.columns, show="headings", height = 22)
         self.table.place(relx = 20 * WIDGET_SHIFT / MAIN_WIDTH, rely = 100 * WIDGET_SHIFT / MAIN_HEIGHT)
 
@@ -114,6 +117,12 @@ class MainApplication:
 
         return True
     
+    def treeview_change(self, i: int, x: float, y: float):
+        self.table.set(i, TABLE_X_ID, x)
+        self.table.set(i, TABLE_Y_ID, y)
+
+        return True
+    
     def treeview_delete_all(self):
         for i in range(len(self.IDs) - 1, -1, -1):
             self.treeview_delete(self.IDs[i])
@@ -125,8 +134,10 @@ class MainApplication:
     # MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG
 
     def widgets_result_msg(self):
+        self.reslabel = tk.Label(text="Результаты действий")
+        self.reslabel.place(relx = 20 * WIDGET_SHIFT / MAIN_WIDTH, rely = 290 * WIDGET_SHIFT / MAIN_HEIGHT)
+
         self.restxt = tk.Entry(width = 100)
-        self.restxt.insert(0, "Результаты действий")
         self.restxt.place(relx = 20 * WIDGET_SHIFT / MAIN_WIDTH, rely = 300 * WIDGET_SHIFT / MAIN_HEIGHT)
 
     def res_msg(self, txt: str):
@@ -173,13 +184,15 @@ class MainApplication:
         self.delete_button = tk.Button(text="Удалить точку", width=BUTTON_WIDTH, height=BUTTON_HEIGHT, command = self.point_delete)
         self.delete_button.place(relx = 180 * WIDGET_SHIFT / MAIN_WIDTH, rely = 40 * WIDGET_SHIFT / MAIN_HEIGHT)
 
+        self.deletelabel_n = tk.Label(text="№")
+        self.deletelabel_n.place(relx = 10 * WIDGET_SHIFT / MAIN_WIDTH, rely = 40 * WIDGET_SHIFT / MAIN_HEIGHT)
+
         self.delete_entry_n = tk.Entry(textvariable="№", width=ENTRY_WIDTH)
-        self.delete_entry_n.insert(0, "№")
         self.delete_entry_n.place(relx = 20 * WIDGET_SHIFT / MAIN_WIDTH, rely = 40 * WIDGET_SHIFT / MAIN_HEIGHT)
 
     def widgets_points_delete_all(self):
         self.delete_all_button = tk.Button(text="Удалить все точки", width=BUTTON_WIDTH, height=BUTTON_HEIGHT, command = self.points_delete_all)
-        self.delete_all_button.place(relx = 20 * WIDGET_SHIFT / MAIN_WIDTH, rely = 60 * WIDGET_SHIFT / MAIN_HEIGHT)
+        self.delete_all_button.place(relx = 20 * WIDGET_SHIFT / MAIN_WIDTH, rely = 80 * WIDGET_SHIFT / MAIN_HEIGHT)
 
     # DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE
 
@@ -220,15 +233,92 @@ class MainApplication:
         self.addbutton = tk.Button(text="Добавить точку", width=BUTTON_WIDTH, height=BUTTON_HEIGHT, command = self.point_add)
         self.addbutton.place(relx = 180 * WIDGET_SHIFT / MAIN_WIDTH, rely = 20 * WIDGET_SHIFT / MAIN_HEIGHT)
 
+        self.addlabel_x = tk.Label(text="X")
+        self.addlabel_x.place(relx = 10 * WIDGET_SHIFT / MAIN_WIDTH, rely = 20 * WIDGET_SHIFT / MAIN_HEIGHT)
+
         self.addentry_x = tk.Entry(textvariable="X", width=ENTRY_WIDTH)
-        self.addentry_x.insert(0, "X")
         self.addentry_x.place(relx = 20 * WIDGET_SHIFT / MAIN_WIDTH, rely = 20 * WIDGET_SHIFT / MAIN_HEIGHT)
 
+        self.addlabel_y = tk.Label(text="Y")
+        self.addlabel_y.place(relx = 90 * WIDGET_SHIFT / MAIN_WIDTH, rely = 20 * WIDGET_SHIFT / MAIN_HEIGHT)
+
         self.addentry_y = tk.Entry(textvariable="Y", width=ENTRY_WIDTH)
-        self.addentry_y.insert(0, "Y")
         self.addentry_y.place(relx = 100 * WIDGET_SHIFT / MAIN_WIDTH, rely = 20 * WIDGET_SHIFT / MAIN_HEIGHT)
     
     # ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD ADD
+
+    def point_change(self):
+        x = 0
+        y = 0
+
+        i = 0
+
+        entered = self.changeentry_n.get()
+        if not(is_int(entered)):
+            self.res_msg("Неправильное значение №")
+
+            return False
+
+        i = int(entered) - 1
+
+        if not(len(self.IDs)):
+            self.res_msg("Число точек равно нулю")
+
+            return False
+
+        if i not in self.IDs:
+            self.res_msg("Нет точки с таким номером")
+
+            return False
+
+        entered = self.changeentry_x.get()
+        if not(is_float(entered)):
+            self.res_msg("Неправильное значение X")
+
+            return False
+
+        x = float(entered)
+        
+        entered = self.changeentry_y.get()
+        if not(is_float(entered)):
+            self.res_msg("Неправильное значение Y")
+
+            return False
+        
+        y = float(entered)
+
+        if self.is_treeview_element(x, y):
+            self.res_msg("Такая точка уже есть")
+
+            return False
+        
+        self.treeview_change(i, x, y)
+
+        self.res_msg("Точка успешно изменена")
+
+        return True
+
+    def widgets_points_change(self):
+        self.changebutton = tk.Button(text="Изменить точку", width=BUTTON_WIDTH, height=BUTTON_HEIGHT, command = self.point_change)
+        self.changebutton.place(relx = 260 * WIDGET_SHIFT / MAIN_WIDTH, rely = 60 * WIDGET_SHIFT / MAIN_HEIGHT)
+
+        self.changelabel_n = tk.Label(text="№")
+        self.changelabel_n.place(relx = 10 * WIDGET_SHIFT / MAIN_WIDTH, rely = 60 * WIDGET_SHIFT / MAIN_HEIGHT)
+
+        self.changeentry_n = tk.Entry(textvariable="№n", width=ENTRY_WIDTH)
+        self.changeentry_n.place(relx = 20 * WIDGET_SHIFT / MAIN_WIDTH, rely = 60 * WIDGET_SHIFT / MAIN_HEIGHT)
+
+        self.changelabel_x = tk.Label(text="X")
+        self.changelabel_x.place(relx = 90 * WIDGET_SHIFT / MAIN_WIDTH, rely = 60 * WIDGET_SHIFT / MAIN_HEIGHT)
+
+        self.changeentry_x = tk.Entry(textvariable="Xx", width=ENTRY_WIDTH)
+        self.changeentry_x.place(relx = 100 * WIDGET_SHIFT / MAIN_WIDTH, rely = 60 * WIDGET_SHIFT / MAIN_HEIGHT)
+
+        self.changelabel_y = tk.Label(text="Y")
+        self.changelabel_y.place(relx = 170 * WIDGET_SHIFT / MAIN_WIDTH, rely = 60 * WIDGET_SHIFT / MAIN_HEIGHT)
+
+        self.changeentry_y = tk.Entry(textvariable="Yy", width=ENTRY_WIDTH)
+        self.changeentry_y.place(relx = 180 * WIDGET_SHIFT / MAIN_WIDTH, rely = 60 * WIDGET_SHIFT / MAIN_HEIGHT)
 
     def calculate(self):
         data = self.treeview_all_elements()
@@ -253,7 +343,7 @@ class MainApplication:
         return True
 
     def widgets_calculate(self):
-        self.addbutton = tk.Button(text="Получить результат", width=BUTTON_WIDTH, height=BUTTON_HEIGHT, command = self.calculate)
+        self.addbutton = tk.Button(text="Получить результат", width=BUTTON_WIDTH + 10, height=BUTTON_HEIGHT, command = self.calculate)
         self.addbutton.place(relx = 20 * WIDGET_SHIFT / MAIN_WIDTH, rely = 320 * WIDGET_SHIFT / MAIN_HEIGHT)
 
     def __init__(self) -> None:
@@ -267,6 +357,7 @@ class MainApplication:
         self.widgets_points_add()
         self.widgets_points_delete()
         self.widgets_points_delete_all()
+        self.widgets_points_change()
         self.widgets_calculate()
 
         self.root.mainloop()
