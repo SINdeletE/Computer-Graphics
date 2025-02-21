@@ -3,7 +3,7 @@ import math
 import copy
 
 DEFAULT_SCALE = 1
-DEFAULT_SIZE_K = 20
+DEFAULT_SIZE_K = 40
 
 FST_Y = math.sqrt(11025 / 144) - 99 / 12
 LST_Y = math.sqrt(10017 / 144) - 99 / 12
@@ -89,42 +89,42 @@ def figure_action(figure: dict, process_matrix_get, **kwargs):
 
     for i in range(len(new_figure['rect']['points'])):
         new_figure['rect']['points'][i][2] = k
-        new_figure['rect']['points'][i] = numpy.multiply(                \
+        new_figure['rect']['points'][i] = numpy.dot(                \
                                         new_figure['rect']['points'][i],    \
                                         process_matrix
                                         )
     
     for i in range(len(new_figure['rect']['arc_points'])):
         new_figure['rect']['arc_points'][i][2] = k
-        new_figure['rect']['arc_points'][i] = numpy.multiply(                \
+        new_figure['rect']['arc_points'][i] = numpy.dot(                \
                                         new_figure['rect']['arc_points'][i],    \
                                         process_matrix
                                         )
 
     for i in range(len(new_figure['wheels']['points'])):
         new_figure['wheels']['points'][i][2] = k
-        new_figure['wheels']['points'][i] = numpy.multiply(                \
+        new_figure['wheels']['points'][i] = numpy.dot(                \
                                         new_figure['wheels']['points'][i],    \
                                         process_matrix
                                         )
         
     for i in range(len(new_figure['tower']['points'])):
         new_figure['tower']['points'][i][2] = k
-        new_figure['tower']['points'][i] = numpy.multiply(                \
+        new_figure['tower']['points'][i] = numpy.dot(                \
                                         new_figure['tower']['points'][i],    \
                                         process_matrix
                                         )
     
     for i in range(len(new_figure['tower']['points'])):
         new_figure['tube']['points'][i][2] = k
-        new_figure['tube']['points'][i] = numpy.multiply(                \
+        new_figure['tube']['points'][i] = numpy.dot(                \
                                         new_figure['tube']['points'][i],    \
                                         process_matrix
                                         )
     
     for i in range(len(new_figure['tube']['points'])):
         new_figure['tube']['points'][i][2] = k
-        new_figure['tube']['points'][i] = numpy.multiply(                \
+        new_figure['tube']['points'][i] = numpy.dot(                \
                                         new_figure['tube']['points'][i],    \
                                         process_matrix
                                         )

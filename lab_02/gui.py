@@ -29,8 +29,8 @@ VERTICAL_LEVEL_4 = (VERTICAL_SPACE * (3 + 1) + BUTTON_WIDTH * 3) / MAIN_WIDTH
 #___DRAW___
 FIGURE_COLOR = 'blue'
 
-DEFAULT_CENTER_X = MAIN_WIDTH / 2
-DEFAULT_CENTER_Y = MAIN_HEIGHT / 2
+DEFAULT_CENTER_X = CANVAS_WIDTH / 2
+DEFAULT_CENTER_Y = CANVAS_HEIGHT / 2
 
 def is_int(text: str) -> bool:
     try:
@@ -121,12 +121,10 @@ class MainApplication:
         # rect
         rect_line1 = [figure_link['rect']['points'][0][:2:], figure_link['rect']['points'][3][:2:]]
         rect_line2 = [figure_link['rect']['points'][1][:2:], figure_link['rect']['points'][2][:2:]]
-        
-        print(rect_line1, rect_line2)
 
-        object_id = self.canvas.create_line(*rect_line1[0], *rect_line1[1], color=FIGURE_COLOR)
+        object_id = self.canvas.create_line(*rect_line1[0], *rect_line1[1], fill=FIGURE_COLOR)
         self.IDs.append(object_id)
 
-        object_id = self.canvas.create_line(*rect_line2[0], *rect_line2[1], color=FIGURE_COLOR)
+        object_id = self.canvas.create_line(*rect_line2[0], *rect_line2[1], fill=FIGURE_COLOR)
         self.IDs.append(object_id)
 
