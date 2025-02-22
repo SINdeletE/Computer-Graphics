@@ -3,9 +3,9 @@ import math
 import copy
 
 DEFAULT_SCALE = 1
-DEFAULT_SIZE_K = 40
+DEFAULT_SIZE_K = 60
 
-FST_Y = math.sqrt(11025 / 144) - 99 / 12
+FST_Y = 0.5
 LST_Y = math.sqrt(10017 / 144) - 99 / 12
 
 # Список координат точек исходного рисунка
@@ -22,21 +22,26 @@ tank_figure_scheme = {
                             'arc_points':
                                 [
                                     numpy.array([10 * DEFAULT_SIZE_K, -2 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
-                                    numpy.array([-10 * DEFAULT_SIZE_K, 2 * DEFAULT_SIZE_K, DEFAULT_SCALE])
+                                    numpy.array([6 * DEFAULT_SIZE_K, 2 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
+                                    numpy.array([-10 * DEFAULT_SIZE_K, 2 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
+                                    numpy.array([-6 * DEFAULT_SIZE_K, -2 * DEFAULT_SIZE_K, DEFAULT_SCALE])
                                 ]
                         },
                         'wheels':
                         {
                             'points':
                                 [
-                                    numpy.array([-6 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]),   # 1-е колесо
-                                    numpy.array([-3 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]),  # 2-е колесо
-                                    numpy.array([0 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]), # 3-е колесо
-                                    numpy.array([3 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]),  # 4-е колесо
-                                    numpy.array([6 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE])   # 5-е колесо
-                                ],
-                            'radius':
-                                DEFAULT_SIZE_K # Радиус колеса
+                                    numpy.array([-7 * DEFAULT_SIZE_K, 1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),   # 1-е колесо
+                                    numpy.array([-5 * DEFAULT_SIZE_K, -1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
+                                    numpy.array([-4 * DEFAULT_SIZE_K, 1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),  # 2-е колесо
+                                    numpy.array([-2 * DEFAULT_SIZE_K, -1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
+                                    numpy.array([-1 * DEFAULT_SIZE_K, 1 * DEFAULT_SIZE_K, DEFAULT_SCALE]), # 3-е колесо
+                                    numpy.array([1 * DEFAULT_SIZE_K, -1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
+                                    numpy.array([2 * DEFAULT_SIZE_K, 1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),  # 4-е колесо
+                                    numpy.array([4 * DEFAULT_SIZE_K, -1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
+                                    numpy.array([5 * DEFAULT_SIZE_K, 1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),   # 5-е колесо
+                                    numpy.array([7 * DEFAULT_SIZE_K, -1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
+                                ]
                         },
                         'tower':
                             {
@@ -49,12 +54,10 @@ tank_figure_scheme = {
                                     ],
                                 'ellipse':
                                 {
-                                    # "forming":
-                                    #     [6 * DEFAULT_SIZE_K, 1 * DEFAULT_SIZE_K], # Образующие дуги эллипса
                                     "points":
                                     [
                                         numpy.array([-6 * DEFAULT_SIZE_K, -6 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
-                                        numpy.array([6 * DEFAULT_SIZE_K, -5 * DEFAULT_SIZE_K, DEFAULT_SCALE])
+                                        numpy.array([6 * DEFAULT_SIZE_K, -4 * DEFAULT_SIZE_K, DEFAULT_SCALE])
                                     ]
 
                                 }
@@ -63,14 +66,16 @@ tank_figure_scheme = {
                             {
                                 'points':
                                     [
-                                        numpy.array([-3 * DEFAULT_SIZE_K, (FST_Y + 5) * DEFAULT_SIZE_K, DEFAULT_SCALE]),
+                                        numpy.array([-3 * DEFAULT_SIZE_K, -(FST_Y + 5) * DEFAULT_SIZE_K, DEFAULT_SCALE]),
                                         numpy.array([-3 * DEFAULT_SIZE_K, -8 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
                                         numpy.array([-1 * DEFAULT_SIZE_K, -8 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
                                         numpy.array([-1 * DEFAULT_SIZE_K, -9 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
                                         numpy.array([-4 * DEFAULT_SIZE_K, -9 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
-                                        numpy.array([-4 * DEFAULT_SIZE_K, (LST_Y + 5) * DEFAULT_SIZE_K, DEFAULT_SCALE])
+                                        numpy.array([-4 * DEFAULT_SIZE_K, -(LST_Y + 5) * DEFAULT_SIZE_K, DEFAULT_SCALE])
                                     ]
-                            }
+                            },
+                        'angle':
+                            0
                     }
 
 # ___Перенос___
@@ -81,6 +86,11 @@ def figure_action(figure: dict, process_matrix_get, **kwargs):
         k = data['k']
     except Exception:
         k = 1
+
+    try: # Измененение угла фигуры
+        figure['angle'] = data['angle']
+    except Exception:
+        pass
 
     process_matrix = process_matrix_get(dict(data))
     new_figure = figure

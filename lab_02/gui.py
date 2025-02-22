@@ -28,6 +28,7 @@ VERTICAL_LEVEL_4 = (VERTICAL_SPACE * (3 + 1) + BUTTON_WIDTH * 3) / MAIN_WIDTH
 
 #___DRAW___
 FIGURE_COLOR = 'blue'
+FIGURE_BORDER_WIDTH = 4
 
 DEFAULT_CENTER_X = CANVAS_WIDTH / 2
 DEFAULT_CENTER_Y = CANVAS_HEIGHT / 2
@@ -118,7 +119,7 @@ class MainApplication:
     def figure_draw(self):
         figure_link = self.figure.get()
         
-        # rect
+        # ___rect___
         rect_lines = [
                         [figure_link['rect']['points'][0][:2:], figure_link['rect']['points'][3][:2:]],
                         [figure_link['rect']['points'][1][:2:], figure_link['rect']['points'][2][:2:]]
@@ -128,18 +129,38 @@ class MainApplication:
             self.figure_line_create(line[0], line[1])
 
         arc_lines = [
-                        [figure_link['rect']['arc_points'][0][:2:], figure_link['rect']['points'][0][:2:]],
-                        [figure_link['rect']['arc_points'][1][:2:], figure_link['rect']['points'][2][:2:]]
+                        [figure_link['rect']['arc_points'][0][:2:], figure_link['rect']['arc_points'][1][:2:]],
+                        [figure_link['rect']['arc_points'][2][:2:], figure_link['rect']['arc_points'][3][:2:]]
                     ]
 
-        for arc in arc_lines:
-            self.figure_arc_create(arc[0], arc[1])
+        self.figure_arc_create(arc_lines[0][0], arc_lines[0][1], -90)
+        self.figure_arc_create(arc_lines[1][0], arc_lines[1][1], 90)
+
+        # ___wheels___
+        for i in range(0, len(figure_link['wheels']['points']), 2):
+            self.figure_circle_create(figure_link['wheels']['points'][i][:2:], figure_link['wheels']['points'][i + 1][:2:])
+        
+        # ___tower___
+        for i in range(len(figure_link['tower']['points']) - 1):
+            self.figure_line_create(figure_link['tower']['points'][i][:2:], figure_link['tower']['points'][i + 1][:2:])
+
+        # ___tower_ellipse___
+        self.figure_arc_create(figure_link['tower']['ellipse']['points'][0][:2:], figure_link['tower']['ellipse']['points'][1][:2:], 0)
+
+        # ___tube___
+        for i in range(len(figure_link['tube']['points']) - 1):
+            self.figure_line_create(figure_link['tube']['points'][i][:2:], figure_link['tube']['points'][i + 1][:2:])
+        
 
     def figure_line_create(self, p1: list, p2: list):
-        object_id = self.canvas.create_line(*p1, *p2, fill=FIGURE_COLOR)
+        object_id = self.canvas.create_line(*p1, *p2, fill=FIGURE_COLOR, width=FIGURE_BORDER_WIDTH)
         self.IDs.append(object_id)
 
-    def figure_arc_create(self, p_left_up: list, p_right_down: list):
-        object_id = self.canvas.create_arc(*p_left_up, *p_right_down, start=-90, extent=180)
+    def figure_arc_create(self, p_left_up: list, p_right_down: list, angle: float):
+        object_id = self.canvas.create_arc(*p_left_up, *p_right_down, start=angle, extent=180, style='arc', outline=FIGURE_COLOR, width=FIGURE_BORDER_WIDTH)
+        self.IDs.append(object_id)
+
+    def figure_circle_create(self, p_left_up: list, p_right_down: list):
+        object_id = self.canvas.create_oval(*p_left_up, *p_right_down, outline=FIGURE_COLOR, width=FIGURE_BORDER_WIDTH)
         self.IDs.append(object_id)
 
