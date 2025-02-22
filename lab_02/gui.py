@@ -119,12 +119,27 @@ class MainApplication:
         figure_link = self.figure.get()
         
         # rect
-        rect_line1 = [figure_link['rect']['points'][0][:2:], figure_link['rect']['points'][3][:2:]]
-        rect_line2 = [figure_link['rect']['points'][1][:2:], figure_link['rect']['points'][2][:2:]]
+        rect_lines = [
+                        [figure_link['rect']['points'][0][:2:], figure_link['rect']['points'][3][:2:]],
+                        [figure_link['rect']['points'][1][:2:], figure_link['rect']['points'][2][:2:]]
+                    ]
 
-        object_id = self.canvas.create_line(*rect_line1[0], *rect_line1[1], fill=FIGURE_COLOR)
+        for line in rect_lines:
+            self.figure_line_create(line[0], line[1])
+
+        arc_lines = [
+                        [figure_link['rect']['arc_points'][0][:2:], figure_link['rect']['points'][0][:2:]],
+                        [figure_link['rect']['arc_points'][1][:2:], figure_link['rect']['points'][2][:2:]]
+                    ]
+
+        for arc in arc_lines:
+            self.figure_arc_create(arc[0], arc[1])
+
+    def figure_line_create(self, p1: list, p2: list):
+        object_id = self.canvas.create_line(*p1, *p2, fill=FIGURE_COLOR)
         self.IDs.append(object_id)
 
-        object_id = self.canvas.create_line(*rect_line2[0], *rect_line2[1], fill=FIGURE_COLOR)
+    def figure_arc_create(self, p_left_up: list, p_right_down: list):
+        object_id = self.canvas.create_arc(*p_left_up, *p_right_down, start=-90, extent=180)
         self.IDs.append(object_id)
 

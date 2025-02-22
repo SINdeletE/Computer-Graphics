@@ -23,9 +23,7 @@ tank_figure_scheme = {
                                 [
                                     numpy.array([10 * DEFAULT_SIZE_K, -2 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
                                     numpy.array([-10 * DEFAULT_SIZE_K, 2 * DEFAULT_SIZE_K, DEFAULT_SCALE])
-                                ],
-                            'radius': 
-                                2 * DEFAULT_SIZE_K
+                                ]
                         },
                         'wheels':
                         {
@@ -55,8 +53,8 @@ tank_figure_scheme = {
                                     #     [6 * DEFAULT_SIZE_K, 1 * DEFAULT_SIZE_K], # Образующие дуги эллипса
                                     "points":
                                     [
-                                        numpy.array([-6 * DEFAULT_SIZE_K, -6 * DEFAULT_SIZE_K]),
-                                        numpy.array([6 * DEFAULT_SIZE_K, -5 * DEFAULT_SIZE_K])
+                                        numpy.array([-6 * DEFAULT_SIZE_K, -6 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
+                                        numpy.array([6 * DEFAULT_SIZE_K, -5 * DEFAULT_SIZE_K, DEFAULT_SCALE])
                                     ]
 
                                 }
@@ -115,10 +113,10 @@ def figure_action(figure: dict, process_matrix_get, **kwargs):
                                         process_matrix
                                         )
     
-    for i in range(len(new_figure['tower']['points'])):
-        new_figure['tube']['points'][i][2] = k
-        new_figure['tube']['points'][i] = numpy.dot(                \
-                                        new_figure['tube']['points'][i],    \
+    for i in range(len(new_figure['tower']['ellipse']['points'])):
+        new_figure['tower']['ellipse']['points'][i][2] = k
+        new_figure['tower']['ellipse']['points'][i] = numpy.dot(                \
+                                        new_figure['tower']['ellipse']['points'][i],    \
                                         process_matrix
                                         )
     
