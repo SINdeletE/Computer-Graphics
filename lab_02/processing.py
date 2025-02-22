@@ -5,8 +5,8 @@ import copy
 DEFAULT_SCALE = 1
 DEFAULT_SIZE_K = 60
 
-FST_Y = 0.5
-LST_Y = math.sqrt(10017 / 144) - 99 / 12
+FST_Y = math.sqrt(3) / 2
+LST_Y = math.sqrt(20) / 6
 
 # Список координат точек исходного рисунка
 tank_figure_scheme = {
