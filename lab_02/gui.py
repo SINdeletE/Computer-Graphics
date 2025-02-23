@@ -259,9 +259,9 @@ class MainApplication:
     def figure_draw(self):
         figure_link = self.figure.get()
 
-        # sign = 1
-        # if figure_link['k'] < -pcs.EPS:
-        #     sign = -1
+        sign = 1
+        if figure_link['k'] < -pcs.EPS:
+            sign = -1
         
         # ___rect___
         rect_lines = [
@@ -279,7 +279,7 @@ class MainApplication:
                         [figure_link['rect']['arc_points'][0][0] + figure_link['rect']['radius'], figure_link['rect']['arc_points'][0][1] + figure_link['rect']['radius']]
                     ]
 
-        object_id = self.figure_arc_create(arc_line_left[0], arc_line_left[1], 90 + figure_link['angle'])
+        object_id = self.figure_arc_create(arc_line_left[0], arc_line_left[1], sign * 90 + figure_link['angle'])
         # self.IDs['rect']['arc_points'].append(object_id)
 
         arc_line_right = [
@@ -287,7 +287,7 @@ class MainApplication:
                         [figure_link['rect']['arc_points'][1][0] + figure_link['rect']['radius'], figure_link['rect']['arc_points'][1][1] + figure_link['rect']['radius']]
                     ]
 
-        object_id = self.figure_arc_create(arc_line_right[0], arc_line_right[1], -90 + figure_link['angle'])
+        object_id = self.figure_arc_create(arc_line_right[0], arc_line_right[1], sign * -90 + figure_link['angle'])
         # self.IDs['rect']['arc_points'].append(object_id)
 
         # ___wheels___

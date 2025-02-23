@@ -110,7 +110,7 @@ def figure_action(figure: dict, process_matrix_get, **kwargs):
 
     try: # Изменение коэффициента масштабирования
         k = data['k']
-        new_figure['k'] = data['k']
+        new_figure['k'] *= data['k']
     except Exception:
         k = 1
 
