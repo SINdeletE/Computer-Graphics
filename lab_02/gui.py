@@ -15,6 +15,7 @@ CANVAS_WIDTH = CANVAS_HEIGHT
 TASK_HEIGHT = 700
 TASK_WIDTH = 700
 
+ENTRY_WIDTH = 15
 BUTTON_WIDTH = 300
 
 # Разница по делениям
@@ -77,11 +78,44 @@ class MainApplication:
         self.root.geometry(f"{MAIN_WIDTH}x{MAIN_HEIGHT}")
 
         self.widget_canvas()
-        self.widget_error_entry()
-        self.widget_task_button()
+        self.widgets_error_entry()
+        self.widgets_task_button()
+        self.widgets_move()
+        self.widgets_scale()
+        self.widgets_rotate()
 
-        # ID объектов
-        self.IDs = []
+        # # ID объектов
+        # self.IDs = {
+        #                 'rect': # points не хранит точки, а хранит уже готовые объекты
+        #                 {
+        #                     'points':
+        #                         [],
+        #                     'arc_points':
+        #                         []
+        #                 },
+        #                 'wheels':
+        #                 {
+        #                     'points':
+        #                         []
+        #                 },
+        #                 'tower':
+        #                     {
+        #                         'points':
+        #                             [],
+        #                         'ellipse':
+        #                         {
+        #                             "points":
+        #                             []
+
+        #                         }
+        #                     },
+        #                 'tube':
+        #                     {
+        #                         'points':
+        #                             []
+        #                     },
+        #                 'angle': 0
+        #             }
 
         # Класс фигуры
         self.figure = pcs.Figure()
@@ -96,9 +130,115 @@ class MainApplication:
     def task_window_open(self):
         self.task = TaskWindow()
     
-    def widget_task_button(self):
+    def widgets_task_button(self):
         self.task_button = tk.Button(self.root, text="Условие задания", command=self.task_window_open)
         self.task_button.place(relx=VERTICAL_LEVEL_1, rely=0.95, width=BUTTON_WIDTH)
+
+    # ___ERROR___
+
+    def widgets_error_entry(self):
+        self.error_label = tk.Label(self.root, text='Результаты действий над рисунком', width=30)
+        self.error_label.place(relx=VERTICAL_LEVEL_2, rely=0.92)
+
+        self.error_entry = tk.Entry(self.root, width=50)
+        self.error_entry.config(state='readonly')
+        self.error_entry.place(relx=VERTICAL_LEVEL_2, rely=0.95)
+    
+    def error_msg(self, msg: str):
+        self.error_entry.config(state='normal')
+        self.error_entry.delete(0, tk.END)
+        self.error_entry.insert(0, msg)
+        self.error_entry.config(state='readonly')
+
+    # ___MOVE___
+    
+    def widget_move(self):
+        move_x = 0
+        move_y = 0
+
+        entered = self.move_x_entry.get()
+        if not(is_float(entered)):
+            self.error_msg("Неправильное значение X")
+
+            return False
+
+        move_x = float(entered)
+        
+        entered = self.move_y_entry.get()
+        if not(is_float(entered)):
+            self.error_msg("Неправильное значение Y")
+
+            return False
+        
+        move_y = float(entered)
+        
+        self.figure_event('move', x=move_x, y=move_y)
+
+        self.error_msg("*Перемещение*")
+
+        return True
+
+    def widgets_move(self):
+        self.move_x_entry = tk.Entry(self.root, width=ENTRY_WIDTH)
+        self.move_x_entry.place(relx=VERTICAL_LEVEL_1, rely=0.05)
+
+        self.move_y_entry = tk.Entry(self.root, width=ENTRY_WIDTH)
+        self.move_y_entry.place(relx=VERTICAL_LEVEL_2, rely=0.05)
+
+        self.move_button = tk.Button(self.root, text="Переместить", command=self.widget_move)
+        self.move_button.place(relx=VERTICAL_LEVEL_3, rely=0.05, width=BUTTON_WIDTH)
+
+    # ___SCALE___
+    
+    def widget_scale(self):
+        scale_k = 0
+
+        entered = self.scale_k_entry.get()
+        if not(is_float(entered)):
+            self.error_msg("Неправильное значение k")
+
+            return False
+
+        scale_k = float(entered)
+        
+        self.figure_event('scale', k=scale_k)
+
+        self.error_msg("*Масштабирование*")
+
+        return True
+
+    def widgets_scale(self):
+        self.scale_k_entry = tk.Entry(self.root, width=ENTRY_WIDTH)
+        self.scale_k_entry.place(relx=VERTICAL_LEVEL_1, rely=0.10)
+
+        self.scale_button = tk.Button(self.root, text="Масштабирование", command=self.widget_scale)
+        self.scale_button.place(relx=VERTICAL_LEVEL_3, rely=0.10, width=BUTTON_WIDTH)
+
+    # ___ROTATE___
+    
+    def widget_rotate(self):
+        rotate_angle = 0
+
+        entered = self.rotate_angle_entry.get()
+        if not(is_float(entered)):
+            self.error_msg("Неправильное значение k")
+
+            return False
+
+        rotate_angle = float(entered)
+        
+        self.figure_event('rotate', angle=rotate_angle)
+
+        self.error_msg("*Поворот*")
+
+        return True
+
+    def widgets_rotate(self):
+        self.rotate_angle_entry = tk.Entry(self.root, width=ENTRY_WIDTH)
+        self.rotate_angle_entry.place(relx=VERTICAL_LEVEL_1, rely=0.15)
+
+        self.rotate_button = tk.Button(self.root, text="Повернуть", command=self.widget_rotate)
+        self.rotate_button.place(relx=VERTICAL_LEVEL_3, rely=0.15, width=BUTTON_WIDTH)
 
     # ___CANVAS___
 
@@ -106,16 +246,11 @@ class MainApplication:
         self.canvas = tk.Canvas(self.root, bg='white', height=CANVAS_HEIGHT, width=CANVAS_WIDTH)
         self.canvas.pack(anchor='e')
 
-    # ___ERROR___
-    def widget_error_entry(self):
-        self.error_label = tk.Label(self.root, text='Результаты действий над рисунком', width=30)
-        self.error_label.place(relx=VERTICAL_LEVEL_2, rely=0.92)
-
-        self.error_entry = tk.Entry(self.root, width=50)
-        self.error_entry.config(state='readonly')
-        self.error_entry.place(relx=VERTICAL_LEVEL_2, rely=0.95)
+    def canvas_clear(self):
+        self.canvas.delete('all')
 
     # ___DRAW___
+
     def figure_draw(self):
         figure_link = self.figure.get()
         
@@ -126,41 +261,76 @@ class MainApplication:
                     ]
 
         for line in rect_lines:
-            self.figure_line_create(line[0], line[1])
+            object_id = self.figure_line_create(line[0], line[1])
+            # self.IDs['rect']['points'].append(object_id)
 
+        # __arc___
         arc_lines = [
                         [figure_link['rect']['arc_points'][0][:2:], figure_link['rect']['arc_points'][1][:2:]],
                         [figure_link['rect']['arc_points'][2][:2:], figure_link['rect']['arc_points'][3][:2:]]
                     ]
 
-        self.figure_arc_create(arc_lines[0][0], arc_lines[0][1], -90)
-        self.figure_arc_create(arc_lines[1][0], arc_lines[1][1], 90)
+        self.figure_arc_create(arc_lines[0][0], arc_lines[0][1], -90 + figure_link['angle'])
+        # self.IDs['rect']['arc_points'].append(object_id)
+
+        self.figure_arc_create(arc_lines[1][0], arc_lines[1][1], 90 + figure_link['angle'])
+        # self.IDs['rect']['arc_points'].append(object_id)
 
         # ___wheels___
         for i in range(0, len(figure_link['wheels']['points']), 2):
-            self.figure_circle_create(figure_link['wheels']['points'][i][:2:], figure_link['wheels']['points'][i + 1][:2:])
+            object_id = self.figure_circle_create(figure_link['wheels']['points'][i][:2:], figure_link['wheels']['points'][i + 1][:2:])
+            # self.IDs['wheels']['points'].append(object_id)
         
         # ___tower___
         for i in range(len(figure_link['tower']['points']) - 1):
-            self.figure_line_create(figure_link['tower']['points'][i][:2:], figure_link['tower']['points'][i + 1][:2:])
+            object_id = self.figure_line_create(figure_link['tower']['points'][i][:2:], figure_link['tower']['points'][i + 1][:2:])
+            # self.IDs['tower']['points'].append(object_id)
 
         # ___tower_ellipse___
-        self.figure_arc_create(figure_link['tower']['ellipse']['points'][0][:2:], figure_link['tower']['ellipse']['points'][1][:2:], 0)
+        object_id = self.figure_arc_create(figure_link['tower']['ellipse']['points'][0][:2:], figure_link['tower']['ellipse']['points'][1][:2:], 0 + figure_link['angle'])
+        # self.IDs['tower']['ellipse']['points'].append(object_id)
 
         # ___tube___
         for i in range(len(figure_link['tube']['points']) - 1):
-            self.figure_line_create(figure_link['tube']['points'][i][:2:], figure_link['tube']['points'][i + 1][:2:])
+            object_id = self.figure_line_create(figure_link['tube']['points'][i][:2:], figure_link['tube']['points'][i + 1][:2:])
+            # self.IDs['tube']['points'].append(object_id)
         
 
     def figure_line_create(self, p1: list, p2: list):
         object_id = self.canvas.create_line(*p1, *p2, fill=FIGURE_COLOR, width=FIGURE_BORDER_WIDTH)
-        self.IDs.append(object_id)
+        
+        return object_id
 
     def figure_arc_create(self, p_left_up: list, p_right_down: list, angle: float):
         object_id = self.canvas.create_arc(*p_left_up, *p_right_down, start=angle, extent=180, style='arc', outline=FIGURE_COLOR, width=FIGURE_BORDER_WIDTH)
-        self.IDs.append(object_id)
+        
+        return object_id
 
     def figure_circle_create(self, p_left_up: list, p_right_down: list):
-        object_id = self.canvas.create_oval(*p_left_up, *p_right_down, outline=FIGURE_COLOR, width=FIGURE_BORDER_WIDTH)
-        self.IDs.append(object_id)
+        object_id = self.canvas.create_arc(*p_left_up, *p_right_down, extent=360, style = 'arc', outline=FIGURE_COLOR, width=FIGURE_BORDER_WIDTH)
+        
+        return object_id
+
+    # ___EVENT___
+
+    def figure_event(self, event: str, **kwargs):
+        match event:
+            case 'move':
+                self.figure.move(kwargs['x'], -kwargs['y'])
+
+                self.canvas_clear()
+                self.figure_draw()
+            
+            case 'scale':
+                self.figure.scale(kwargs['k'])
+
+                self.canvas_clear()
+                self.figure_draw()
+            
+            case 'rotate':
+                self.figure.rotate(kwargs['angle'])
+
+                self.canvas_clear()
+                self.figure_draw()
+
 

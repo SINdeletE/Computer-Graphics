@@ -3,7 +3,7 @@ import math
 import copy
 
 DEFAULT_SCALE = 1
-DEFAULT_SIZE_K = 60
+DEFAULT_SIZE_K = 40
 
 FST_Y = math.sqrt(3) / 2
 LST_Y = math.sqrt(20) / 6
@@ -75,7 +75,8 @@ tank_figure_scheme = {
                                     ]
                             },
                         'angle':
-                            0
+                            0,
+                        'center': [0, 0, DEFAULT_SCALE]
                     }
 
 # ___Перенос___
@@ -136,6 +137,8 @@ def figure_action(figure: dict, process_matrix_get, **kwargs):
                                         new_figure['tube']['points'][i],    \
                                         process_matrix
                                         )
+    
+    new_figure['center'] = numpy.dot(new_figure['center'], process_matrix)
 
     return new_figure
 
@@ -151,8 +154,8 @@ def move_matrix_get(data: dict):
 def scale_matrix_get(data: dict):
     return numpy.array(
                         [
-                            [data['kx'], 0, 0],
-                            [0, data['ky'], 0],
+                            [data['k'], 0, 0],
+                            [0, data['k'], 0],
                             [0, 0, 1]
                         ]
                     )
@@ -186,7 +189,11 @@ class Figure:
         figure_action(self.figure, scale_matrix_get, k=scale_k)
 
     def rotate(self, rotate_angle: float):
-        figure_action(self.figure, scale_matrix_get, rad=angle_to_rad(rotate_angle))
+        center = self.figure['center']
+
+        figure_action(self.figure, move_matrix_get, x=-center[0], y=-center[1])
+        figure_action(self.figure, rotate_matrix_get, rad=angle_to_rad(rotate_angle))
+        figure_action(self.figure, move_matrix_get, x=center[0], y=center[1])
     
     def get(self):
         return self.figure
