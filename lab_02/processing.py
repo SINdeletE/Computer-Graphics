@@ -96,6 +96,8 @@ tank_figure_scheme = {
                             },
                         'angle':
                             0,
+                        'k':
+                            DEFAULT_SCALE,
                         'center': [0, 0, DEFAULT_SCALE]
                     }
 
@@ -103,13 +105,14 @@ tank_figure_scheme = {
 def figure_action(figure: dict, process_matrix_get, **kwargs):
     data = dict(kwargs.items())
 
-    try: # Изменение коэффициента масштабирования
-        k = data['k']
-    except Exception:
-        k = 1
-
     process_matrix = process_matrix_get(data)
     new_figure = figure
+
+    try: # Изменение коэффициента масштабирования
+        k = data['k']
+        new_figure['k'] = data['k']
+    except Exception:
+        k = 1
 
     for i in range(len(new_figure['rect']['points'])):
         new_figure['rect']['points'][i][2] = k
@@ -202,7 +205,11 @@ class Figure:
         self.figure = figure_action(self.figure, move_matrix_get, x=move_x, y=move_y)
 
     def scale(self, scale_k: float):
+        center = self.figure['center']
+
+        self.figure = figure_action(self.figure, move_matrix_get, x=-center[0], y=-center[1])
         self.figure = figure_action(self.figure, scale_matrix_get, k=scale_k)
+        self.figure = figure_action(self.figure, move_matrix_get, x=center[0], y=center[1])
 
     def rotate(self, rotate_angle: float):
         self.figure['angle'] += rotate_angle # Добавляем угол к нынешнему

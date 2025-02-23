@@ -200,6 +200,11 @@ class MainApplication:
             return False
 
         scale_k = float(entered)
+
+        if (abs(scale_k) < pcs.EPS):
+            self.error_msg("Масштаб не может быть равен нулю")
+
+            return False
         
         self.figure_event('scale', k=scale_k)
 
@@ -253,6 +258,10 @@ class MainApplication:
 
     def figure_draw(self):
         figure_link = self.figure.get()
+
+        # sign = 1
+        # if figure_link['k'] < -pcs.EPS:
+        #     sign = -1
         
         # ___rect___
         rect_lines = [
@@ -263,8 +272,6 @@ class MainApplication:
         for line in rect_lines:
             object_id = self.figure_line_create(line[0], line[1])
             # self.IDs['rect']['points'].append(object_id)
-
-        print(figure_link['rect']['radius'])
 
         # __arc___
         arc_line_left = [
