@@ -2,11 +2,37 @@ import numpy
 import math
 import copy
 
+EPS = 1e-5
+
 DEFAULT_SCALE = 1
 DEFAULT_SIZE_K = 40
 
+# Информация для аппроксимации эллипса
+STEPS = 360
+DEFAULT_ELLIPSE_A = 6
+DEFAULT_ELLIPSE_B = 1
+
 FST_Y = math.sqrt(3) / 2
 LST_Y = math.sqrt(20) / 6
+
+# Аппроксимация эллипса
+def ellipse_y_from_x(x: float):
+    res = 1 - x**2 / DEFAULT_ELLIPSE_A**2
+
+    if (abs(res) < EPS):
+        res = 0.0
+    else:
+        res = math.sqrt(res) * DEFAULT_ELLIPSE_B
+    
+    return res
+
+def ellipse_approx(center, gen_a, gen_b):
+    ax = list()
+
+    for x in numpy.linspace(-DEFAULT_ELLIPSE_A, DEFAULT_ELLIPSE_A, STEPS):
+        ax.append(numpy.array([x * DEFAULT_SIZE_K, (-5 - ellipse_y_from_x(x)) * DEFAULT_SIZE_K, DEFAULT_SCALE]))
+    
+    return ax
 
 # Список координат точек исходного рисунка
 tank_figure_scheme = {
@@ -19,29 +45,26 @@ tank_figure_scheme = {
                                     numpy.array([-8 * DEFAULT_SIZE_K, -2 * DEFAULT_SIZE_K, DEFAULT_SCALE]), # Верхняя левая точка
                                     numpy.array([-8 * DEFAULT_SIZE_K, 2 * DEFAULT_SIZE_K, DEFAULT_SCALE])   # Нижняя левая точка
                                 ],
-                            'arc_points':
+                            'arc_points': # Центры полуокружностей
                                 [
-                                    numpy.array([10 * DEFAULT_SIZE_K, -2 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
-                                    numpy.array([6 * DEFAULT_SIZE_K, 2 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
-                                    numpy.array([-10 * DEFAULT_SIZE_K, 2 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
-                                    numpy.array([-6 * DEFAULT_SIZE_K, -2 * DEFAULT_SIZE_K, DEFAULT_SCALE])
-                                ]
+                                    numpy.array([-8 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
+                                    numpy.array([8 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE])
+                                ],
+                            'radius':
+                                2 * DEFAULT_SIZE_K
                         },
                         'wheels':
                         {
-                            'points':
+                            'points': # Центры окружностей
                                 [
-                                    numpy.array([-7 * DEFAULT_SIZE_K, 1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),   # 1-е колесо
-                                    numpy.array([-5 * DEFAULT_SIZE_K, -1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
-                                    numpy.array([-4 * DEFAULT_SIZE_K, 1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),  # 2-е колесо
-                                    numpy.array([-2 * DEFAULT_SIZE_K, -1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
-                                    numpy.array([-1 * DEFAULT_SIZE_K, 1 * DEFAULT_SIZE_K, DEFAULT_SCALE]), # 3-е колесо
-                                    numpy.array([1 * DEFAULT_SIZE_K, -1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
-                                    numpy.array([2 * DEFAULT_SIZE_K, 1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),  # 4-е колесо
-                                    numpy.array([4 * DEFAULT_SIZE_K, -1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
-                                    numpy.array([5 * DEFAULT_SIZE_K, 1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),   # 5-е колесо
-                                    numpy.array([7 * DEFAULT_SIZE_K, -1 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
-                                ]
+                                    numpy.array([-6 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
+                                    numpy.array([-3 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
+                                    numpy.array([0 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
+                                    numpy.array([3 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
+                                    numpy.array([6 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE])
+                                ],
+                            'radius':
+                                1 * DEFAULT_SIZE_K
                         },
                         'tower':
                             {
@@ -54,12 +77,9 @@ tank_figure_scheme = {
                                     ],
                                 'ellipse':
                                 {
-                                    "points":
-                                    [
-                                        numpy.array([-6 * DEFAULT_SIZE_K, -6 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
-                                        numpy.array([6 * DEFAULT_SIZE_K, -4 * DEFAULT_SIZE_K, DEFAULT_SCALE])
-                                    ]
-
+                                    'ax':
+                                        ellipse_approx(numpy.array([0 * DEFAULT_SIZE_K, -5 * DEFAULT_SIZE_K, DEFAULT_SCALE]), \
+                                                                                        DEFAULT_ELLIPSE_A, DEFAULT_ELLIPSE_B)
                                 }
                             },
                         'tube':
@@ -81,19 +101,14 @@ tank_figure_scheme = {
 
 # ___Перенос___
 def figure_action(figure: dict, process_matrix_get, **kwargs):
-    data = kwargs.items()
+    data = dict(kwargs.items())
 
     try: # Изменение коэффициента масштабирования
         k = data['k']
     except Exception:
         k = 1
 
-    try: # Измененение угла фигуры
-        figure['angle'] = data['angle']
-    except Exception:
-        pass
-
-    process_matrix = process_matrix_get(dict(data))
+    process_matrix = process_matrix_get(data)
     new_figure = figure
 
     for i in range(len(new_figure['rect']['points'])):
@@ -109,6 +124,7 @@ def figure_action(figure: dict, process_matrix_get, **kwargs):
                                         new_figure['rect']['arc_points'][i],    \
                                         process_matrix
                                         )
+    new_figure['rect']['radius'] *= k
 
     for i in range(len(new_figure['wheels']['points'])):
         new_figure['wheels']['points'][i][2] = k
@@ -116,7 +132,8 @@ def figure_action(figure: dict, process_matrix_get, **kwargs):
                                         new_figure['wheels']['points'][i],    \
                                         process_matrix
                                         )
-        
+    new_figure['wheels']['radius'] *= k
+
     for i in range(len(new_figure['tower']['points'])):
         new_figure['tower']['points'][i][2] = k
         new_figure['tower']['points'][i] = numpy.dot(                \
@@ -124,10 +141,10 @@ def figure_action(figure: dict, process_matrix_get, **kwargs):
                                         process_matrix
                                         )
     
-    for i in range(len(new_figure['tower']['ellipse']['points'])):
-        new_figure['tower']['ellipse']['points'][i][2] = k
-        new_figure['tower']['ellipse']['points'][i] = numpy.dot(                \
-                                        new_figure['tower']['ellipse']['points'][i],    \
+    for i in range(len(new_figure['tower']['ellipse']['ax'])):
+        new_figure['tower']['ellipse']['ax'][i][2] = k
+        new_figure['tower']['ellipse']['ax'][i] = numpy.dot(                \
+                                        new_figure['tower']['ellipse']['ax'][i],    \
                                         process_matrix
                                         )
     
@@ -172,7 +189,6 @@ def rotate_matrix_get(data: dict):
 def angle_to_rad(angle: float):
     return angle * math.pi / 180
 
-
 # ___FIGURE___
 class Figure:
     def __init__(self):
@@ -180,20 +196,23 @@ class Figure:
 
     def default(self):
         del self.figure
-        self.figure = copy.deepcopy(tank_figure_scheme)
+        self.__init__()
 
     def move(self, move_x: float, move_y: float):
-        figure_action(self.figure, move_matrix_get, x=move_x, y=move_y)
+        self.figure = figure_action(self.figure, move_matrix_get, x=move_x, y=move_y)
 
     def scale(self, scale_k: float):
-        figure_action(self.figure, scale_matrix_get, k=scale_k)
+        self.figure = figure_action(self.figure, scale_matrix_get, k=scale_k)
 
     def rotate(self, rotate_angle: float):
+        self.figure['angle'] += rotate_angle # Добавляем угол к нынешнему
+        self.figure['angle'] %= 360
+
         center = self.figure['center']
 
-        figure_action(self.figure, move_matrix_get, x=-center[0], y=-center[1])
-        figure_action(self.figure, rotate_matrix_get, rad=angle_to_rad(rotate_angle))
-        figure_action(self.figure, move_matrix_get, x=center[0], y=center[1])
+        self.figure = figure_action(self.figure, move_matrix_get, x=-center[0], y=-center[1])
+        self.figure = figure_action(self.figure, rotate_matrix_get, rad=angle_to_rad(rotate_angle))
+        self.figure = figure_action(self.figure, move_matrix_get, x=center[0], y=center[1])
     
     def get(self):
         return self.figure

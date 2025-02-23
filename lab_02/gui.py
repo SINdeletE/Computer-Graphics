@@ -264,21 +264,32 @@ class MainApplication:
             object_id = self.figure_line_create(line[0], line[1])
             # self.IDs['rect']['points'].append(object_id)
 
+        print(figure_link['rect']['radius'])
+
         # __arc___
-        arc_lines = [
-                        [figure_link['rect']['arc_points'][0][:2:], figure_link['rect']['arc_points'][1][:2:]],
-                        [figure_link['rect']['arc_points'][2][:2:], figure_link['rect']['arc_points'][3][:2:]]
+        arc_line_left = [
+                        [figure_link['rect']['arc_points'][0][0] - figure_link['rect']['radius'], figure_link['rect']['arc_points'][0][1] - figure_link['rect']['radius']],
+                        [figure_link['rect']['arc_points'][0][0] + figure_link['rect']['radius'], figure_link['rect']['arc_points'][0][1] + figure_link['rect']['radius']]
                     ]
 
-        self.figure_arc_create(arc_lines[0][0], arc_lines[0][1], -90 + figure_link['angle'])
+        object_id = self.figure_arc_create(arc_line_left[0], arc_line_left[1], 90 + figure_link['angle'])
         # self.IDs['rect']['arc_points'].append(object_id)
 
-        self.figure_arc_create(arc_lines[1][0], arc_lines[1][1], 90 + figure_link['angle'])
+        arc_line_right = [
+                        [figure_link['rect']['arc_points'][1][0] - figure_link['rect']['radius'], figure_link['rect']['arc_points'][1][1] - figure_link['rect']['radius']],
+                        [figure_link['rect']['arc_points'][1][0] + figure_link['rect']['radius'], figure_link['rect']['arc_points'][1][1] + figure_link['rect']['radius']]
+                    ]
+
+        object_id = self.figure_arc_create(arc_line_right[0], arc_line_right[1], -90 + figure_link['angle'])
         # self.IDs['rect']['arc_points'].append(object_id)
 
         # ___wheels___
-        for i in range(0, len(figure_link['wheels']['points']), 2):
-            object_id = self.figure_circle_create(figure_link['wheels']['points'][i][:2:], figure_link['wheels']['points'][i + 1][:2:])
+        for i in range(0, len(figure_link['wheels']['points'])):
+            points = [
+                        [figure_link['wheels']['points'][i][0] - figure_link['wheels']['radius'], figure_link['wheels']['points'][i][1] - figure_link['wheels']['radius']],
+                        [figure_link['wheels']['points'][i][0] + figure_link['wheels']['radius'], figure_link['wheels']['points'][i][1] + figure_link['wheels']['radius']]
+                    ]
+            object_id = self.figure_circle_create(points[0], points[1])
             # self.IDs['wheels']['points'].append(object_id)
         
         # ___tower___
@@ -287,14 +298,14 @@ class MainApplication:
             # self.IDs['tower']['points'].append(object_id)
 
         # ___tower_ellipse___
-        object_id = self.figure_arc_create(figure_link['tower']['ellipse']['points'][0][:2:], figure_link['tower']['ellipse']['points'][1][:2:], 0 + figure_link['angle'])
-        # self.IDs['tower']['ellipse']['points'].append(object_id)
+        for i in range(len(figure_link['tower']['ellipse']['ax']) - 1):
+            object_id = self.figure_line_create(figure_link['tower']['ellipse']['ax'][i][:2:], figure_link['tower']['ellipse']['ax'][i + 1][:2:])
+            # self.IDs['tower']['ellipse']['ax'].append(object_id)
 
         # ___tube___
         for i in range(len(figure_link['tube']['points']) - 1):
             object_id = self.figure_line_create(figure_link['tube']['points'][i][:2:], figure_link['tube']['points'][i + 1][:2:])
             # self.IDs['tube']['points'].append(object_id)
-        
 
     def figure_line_create(self, p1: list, p2: list):
         object_id = self.canvas.create_line(*p1, *p2, fill=FIGURE_COLOR, width=FIGURE_BORDER_WIDTH)
@@ -307,7 +318,7 @@ class MainApplication:
         return object_id
 
     def figure_circle_create(self, p_left_up: list, p_right_down: list):
-        object_id = self.canvas.create_arc(*p_left_up, *p_right_down, extent=360, style = 'arc', outline=FIGURE_COLOR, width=FIGURE_BORDER_WIDTH)
+        object_id = self.canvas.create_oval(*p_left_up, *p_right_down, outline=FIGURE_COLOR, width=FIGURE_BORDER_WIDTH)
         
         return object_id
 
