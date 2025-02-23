@@ -96,7 +96,9 @@ tank_figure_scheme = {
                             },
                         'angle':
                             0,
-                        'k':
+                        'kx':
+                            DEFAULT_SCALE,
+                        'ky':
                             DEFAULT_SCALE,
                         'center': [0, 0, DEFAULT_SCALE]
                     }
@@ -109,50 +111,42 @@ def figure_action(figure: dict, process_matrix_get, **kwargs):
     new_figure = figure
 
     try: # Изменение коэффициента масштабирования
-        k = data['k']
-        new_figure['k'] *= data['k']
+        new_figure['kx'] *= data['kx']
+        new_figure['ky'] *= data['ky']
     except Exception:
-        k = 1
+        pass
 
     for i in range(len(new_figure['rect']['points'])):
-        new_figure['rect']['points'][i][2] = k
         new_figure['rect']['points'][i] = numpy.dot(                \
                                         new_figure['rect']['points'][i],    \
                                         process_matrix
                                         )
     
     for i in range(len(new_figure['rect']['arc_points'])):
-        new_figure['rect']['arc_points'][i][2] = k
         new_figure['rect']['arc_points'][i] = numpy.dot(                \
                                         new_figure['rect']['arc_points'][i],    \
                                         process_matrix
                                         )
-    new_figure['rect']['radius'] *= k
 
     for i in range(len(new_figure['wheels']['points'])):
-        new_figure['wheels']['points'][i][2] = k
         new_figure['wheels']['points'][i] = numpy.dot(                \
                                         new_figure['wheels']['points'][i],    \
                                         process_matrix
                                         )
-    new_figure['wheels']['radius'] *= k
 
     for i in range(len(new_figure['tower']['points'])):
-        new_figure['tower']['points'][i][2] = k
         new_figure['tower']['points'][i] = numpy.dot(                \
                                         new_figure['tower']['points'][i],    \
                                         process_matrix
                                         )
     
     for i in range(len(new_figure['tower']['ellipse']['ax'])):
-        new_figure['tower']['ellipse']['ax'][i][2] = k
         new_figure['tower']['ellipse']['ax'][i] = numpy.dot(                \
                                         new_figure['tower']['ellipse']['ax'][i],    \
                                         process_matrix
                                         )
     
     for i in range(len(new_figure['tube']['points'])):
-        new_figure['tube']['points'][i][2] = k
         new_figure['tube']['points'][i] = numpy.dot(                \
                                         new_figure['tube']['points'][i],    \
                                         process_matrix
@@ -174,8 +168,8 @@ def move_matrix_get(data: dict):
 def scale_matrix_get(data: dict):
     return numpy.array(
                         [
-                            [data['k'], 0, 0],
-                            [0, data['k'], 0],
+                            [data['kx'], 0, 0],
+                            [0, data['ky'], 0],
                             [0, 0, 1]
                         ]
                     )
@@ -204,11 +198,11 @@ class Figure:
     def move(self, move_x: float, move_y: float):
         self.figure = figure_action(self.figure, move_matrix_get, x=move_x, y=move_y)
 
-    def scale(self, scale_k: float):
+    def scale(self, scale_kx: float, scale_ky: float):
         center = self.figure['center']
 
         self.figure = figure_action(self.figure, move_matrix_get, x=-center[0], y=-center[1])
-        self.figure = figure_action(self.figure, scale_matrix_get, k=scale_k)
+        self.figure = figure_action(self.figure, scale_matrix_get, kx=scale_kx, ky=scale_ky)
         self.figure = figure_action(self.figure, move_matrix_get, x=center[0], y=center[1])
 
     def rotate(self, rotate_angle: float):

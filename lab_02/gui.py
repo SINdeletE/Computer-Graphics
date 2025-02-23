@@ -191,30 +191,47 @@ class MainApplication:
     # ___SCALE___
     
     def widget_scale(self):
-        scale_k = 0
+        scale_kx = 0
+        scale_ky = 0
 
-        entered = self.scale_k_entry.get()
+        entered = self.scale_kx_entry.get()
         if not(is_float(entered)):
-            self.error_msg("Неправильное значение k")
+            self.error_msg("Неправильное значение kx")
 
             return False
 
-        scale_k = float(entered)
+        scale_kx = float(entered)
 
-        if (abs(scale_k) < pcs.EPS):
-            self.error_msg("Масштаб не может быть равен нулю")
+        if (abs(scale_kx) < pcs.EPS):
+            self.error_msg("Масштаб kx не может быть равен нулю")
 
             return False
         
-        self.figure_event('scale', k=scale_k)
+        entered = self.scale_ky_entry.get()
+        if not(is_float(entered)):
+            self.error_msg("Неправильное значение ky")
+
+            return False
+
+        scale_ky = float(entered)
+
+        if (abs(scale_ky) < pcs.EPS):
+            self.error_msg("Масштаб ky не может быть равен нулю")
+
+            return False
+        
+        self.figure_event('scale', kx=scale_kx, ky=scale_ky)
 
         self.error_msg("*Масштабирование*")
 
         return True
 
     def widgets_scale(self):
-        self.scale_k_entry = tk.Entry(self.root, width=ENTRY_WIDTH)
-        self.scale_k_entry.place(relx=VERTICAL_LEVEL_1, rely=0.10)
+        self.scale_kx_entry = tk.Entry(self.root, width=ENTRY_WIDTH)
+        self.scale_kx_entry.place(relx=VERTICAL_LEVEL_1, rely=0.10)
+
+        self.scale_ky_entry = tk.Entry(self.root, width=ENTRY_WIDTH)
+        self.scale_ky_entry.place(relx=VERTICAL_LEVEL_2, rely=0.10)
 
         self.scale_button = tk.Button(self.root, text="Масштабирование", command=self.widget_scale)
         self.scale_button.place(relx=VERTICAL_LEVEL_3, rely=0.10, width=BUTTON_WIDTH)
@@ -260,7 +277,7 @@ class MainApplication:
         figure_link = self.figure.get()
 
         sign = 1
-        if figure_link['k'] < -pcs.EPS:
+        if figure_link['kx'] < -pcs.EPS:
             sign = -1
         
         # ___rect___
@@ -275,16 +292,16 @@ class MainApplication:
 
         # __arc___
         arc_line_left = [
-                        [figure_link['rect']['arc_points'][0][0] - figure_link['rect']['radius'], figure_link['rect']['arc_points'][0][1] - figure_link['rect']['radius']],
-                        [figure_link['rect']['arc_points'][0][0] + figure_link['rect']['radius'], figure_link['rect']['arc_points'][0][1] + figure_link['rect']['radius']]
+                        [figure_link['rect']['arc_points'][0][0] - figure_link['rect']['radius'] * abs(figure_link['kx']), figure_link['rect']['arc_points'][0][1] - figure_link['rect']['radius'] * abs(figure_link['ky'])],
+                        [figure_link['rect']['arc_points'][0][0] + figure_link['rect']['radius'] * abs(figure_link['kx']), figure_link['rect']['arc_points'][0][1] + figure_link['rect']['radius'] * abs(figure_link['ky'])]
                     ]
 
         object_id = self.figure_arc_create(arc_line_left[0], arc_line_left[1], sign * 90 + figure_link['angle'])
         # self.IDs['rect']['arc_points'].append(object_id)
 
         arc_line_right = [
-                        [figure_link['rect']['arc_points'][1][0] - figure_link['rect']['radius'], figure_link['rect']['arc_points'][1][1] - figure_link['rect']['radius']],
-                        [figure_link['rect']['arc_points'][1][0] + figure_link['rect']['radius'], figure_link['rect']['arc_points'][1][1] + figure_link['rect']['radius']]
+                        [figure_link['rect']['arc_points'][1][0] - figure_link['rect']['radius'] * abs(figure_link['kx']), figure_link['rect']['arc_points'][1][1] - figure_link['rect']['radius'] * abs(figure_link['ky'])],
+                        [figure_link['rect']['arc_points'][1][0] + figure_link['rect']['radius'] * abs(figure_link['kx']), figure_link['rect']['arc_points'][1][1] + figure_link['rect']['radius'] * abs(figure_link['ky'])]
                     ]
 
         object_id = self.figure_arc_create(arc_line_right[0], arc_line_right[1], sign * -90 + figure_link['angle'])
@@ -293,8 +310,8 @@ class MainApplication:
         # ___wheels___
         for i in range(0, len(figure_link['wheels']['points'])):
             points = [
-                        [figure_link['wheels']['points'][i][0] - figure_link['wheels']['radius'], figure_link['wheels']['points'][i][1] - figure_link['wheels']['radius']],
-                        [figure_link['wheels']['points'][i][0] + figure_link['wheels']['radius'], figure_link['wheels']['points'][i][1] + figure_link['wheels']['radius']]
+                        [figure_link['wheels']['points'][i][0] - figure_link['wheels']['radius'] * abs(figure_link['kx']), figure_link['wheels']['points'][i][1] - figure_link['wheels']['radius'] * abs(figure_link['ky'])],
+                        [figure_link['wheels']['points'][i][0] + figure_link['wheels']['radius'] * abs(figure_link['kx']), figure_link['wheels']['points'][i][1] + figure_link['wheels']['radius'] * abs(figure_link['ky'])]
                     ]
             object_id = self.figure_circle_create(points[0], points[1])
             # self.IDs['wheels']['points'].append(object_id)
@@ -340,7 +357,7 @@ class MainApplication:
                 self.figure_draw()
             
             case 'scale':
-                self.figure.scale(kwargs['k'])
+                self.figure.scale(kwargs['kx'], kwargs['ky'])
 
                 self.canvas_clear()
                 self.figure_draw()
