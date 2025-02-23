@@ -29,8 +29,30 @@ def ellipse_y_from_x(x: float):
 def ellipse_approx(center, gen_a, gen_b):
     ax = list()
 
-    for x in numpy.linspace(-DEFAULT_ELLIPSE_A, DEFAULT_ELLIPSE_A, STEPS):
-        ax.append(numpy.array([x * DEFAULT_SIZE_K, (-5 - ellipse_y_from_x(x)) * DEFAULT_SIZE_K, DEFAULT_SCALE]))
+    for x in numpy.linspace(-gen_a, gen_a, STEPS):
+        ax.append(numpy.array([center[0] + x * DEFAULT_SIZE_K, center[1] - ellipse_y_from_x(x) * DEFAULT_SIZE_K, DEFAULT_SCALE]))
+    
+    return ax
+
+def semicircle_x_from_y(y: float, radius):
+    res = radius**2 - y**2
+
+    if (abs(res) < EPS):
+        res = 0.0
+    else:
+        res = math.sqrt(res)
+    
+    return res
+
+def semicircle_approx(center, radius, is_left):
+    ax = list()
+    sign = 1
+
+    if is_left is True:
+        sign = -1
+    
+    for y in numpy.linspace(-radius, radius, STEPS):
+        ax.append(numpy.array([center[0] + sign * semicircle_x_from_y(y, radius) * DEFAULT_SIZE_K, center[1] + y * DEFAULT_SIZE_K, DEFAULT_SCALE]))
     
     return ax
 
@@ -45,26 +67,27 @@ tank_figure_scheme = {
                                     numpy.array([-8 * DEFAULT_SIZE_K, -2 * DEFAULT_SIZE_K, DEFAULT_SCALE]), # Верхняя левая точка
                                     numpy.array([-8 * DEFAULT_SIZE_K, 2 * DEFAULT_SIZE_K, DEFAULT_SCALE])   # Нижняя левая точка
                                 ],
-                            'arc_points': # Центры полуокружностей
+                            'ax':
                                 [
-                                    numpy.array([-8 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
-                                    numpy.array([8 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE])
-                                ],
-                            'radius':
-                                2 * DEFAULT_SIZE_K
+                                    semicircle_approx(numpy.array([-8 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]), 2, True),
+                                    semicircle_approx(numpy.array([8 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]), 2, False)
+                                ]
                         },
                         'wheels':
                         {
-                            'points': # Центры окружностей
+                            'ax':
                                 [
-                                    numpy.array([-6 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
-                                    numpy.array([-3 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
-                                    numpy.array([0 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
-                                    numpy.array([3 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]),
-                                    numpy.array([6 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE])
-                                ],
-                            'radius':
-                                1 * DEFAULT_SIZE_K
+                                    semicircle_approx(numpy.array([-6 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]), 1, True),
+                                    semicircle_approx(numpy.array([-6 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]), 1, False),
+                                    semicircle_approx(numpy.array([-3 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]), 1, True),
+                                    semicircle_approx(numpy.array([-3 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]), 1, False),
+                                    semicircle_approx(numpy.array([0 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]), 1, True),
+                                    semicircle_approx(numpy.array([0 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]), 1, False),
+                                    semicircle_approx(numpy.array([3 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]), 1, True),
+                                    semicircle_approx(numpy.array([3 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]), 1, False),
+                                    semicircle_approx(numpy.array([6 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]), 1, True),
+                                    semicircle_approx(numpy.array([6 * DEFAULT_SIZE_K, 0 * DEFAULT_SIZE_K, DEFAULT_SCALE]), 1, False)
+                                ]
                         },
                         'tower':
                             {
@@ -122,17 +145,19 @@ def figure_action(figure: dict, process_matrix_get, **kwargs):
                                         process_matrix
                                         )
     
-    for i in range(len(new_figure['rect']['arc_points'])):
-        new_figure['rect']['arc_points'][i] = numpy.dot(                \
-                                        new_figure['rect']['arc_points'][i],    \
-                                        process_matrix
-                                        )
+    for z in range(len(new_figure['rect']['ax'])):
+        for i in range(len(new_figure['rect']['ax'][z])):
+            new_figure['rect']['ax'][z][i] = numpy.dot(                \
+                                            new_figure['rect']['ax'][z][i],    \
+                                            process_matrix
+                                            )
 
-    for i in range(len(new_figure['wheels']['points'])):
-        new_figure['wheels']['points'][i] = numpy.dot(                \
-                                        new_figure['wheels']['points'][i],    \
-                                        process_matrix
-                                        )
+    for z in range(len(new_figure['wheels']['ax'])):
+        for i in range(len(new_figure['wheels']['ax'][z])):
+            new_figure['wheels']['ax'][z][i] = numpy.dot(                \
+                                            new_figure['wheels']['ax'][z][i],    \
+                                            process_matrix
+                                            )
 
     for i in range(len(new_figure['tower']['points'])):
         new_figure['tower']['points'][i] = numpy.dot(                \

@@ -64,7 +64,7 @@ class Stack:
             return None
     
     def stack_clear(self):
-        while (self.stack.stack_pop() is not None):
+        while (self.stack_pop() is not None):
             pass
     
     def stack_is_empty(self):
@@ -345,30 +345,16 @@ class MainApplication:
             # self.IDs['rect']['points'].append(object_id)
 
         # __arc___
-        arc_line_left = [
-                        [figure_link['rect']['arc_points'][0][0] - figure_link['rect']['radius'] * abs(figure_link['kx']), figure_link['rect']['arc_points'][0][1] - figure_link['rect']['radius'] * abs(figure_link['ky'])],
-                        [figure_link['rect']['arc_points'][0][0] + figure_link['rect']['radius'] * abs(figure_link['kx']), figure_link['rect']['arc_points'][0][1] + figure_link['rect']['radius'] * abs(figure_link['ky'])]
-                    ]
-
-        object_id = self.figure_arc_create(arc_line_left[0], arc_line_left[1], sign * 90 + figure_link['angle'])
-        # self.IDs['rect']['arc_points'].append(object_id)
-
-        arc_line_right = [
-                        [figure_link['rect']['arc_points'][1][0] - figure_link['rect']['radius'] * abs(figure_link['kx']), figure_link['rect']['arc_points'][1][1] - figure_link['rect']['radius'] * abs(figure_link['ky'])],
-                        [figure_link['rect']['arc_points'][1][0] + figure_link['rect']['radius'] * abs(figure_link['kx']), figure_link['rect']['arc_points'][1][1] + figure_link['rect']['radius'] * abs(figure_link['ky'])]
-                    ]
-
-        object_id = self.figure_arc_create(arc_line_right[0], arc_line_right[1], sign * -90 + figure_link['angle'])
-        # self.IDs['rect']['arc_points'].append(object_id)
+        for z in range(len(figure_link['rect']['ax'])):
+            for i in range(len(figure_link['rect']['ax'][z]) - 1):
+                object_id = self.figure_line_create(figure_link['rect']['ax'][z][i][:2:], figure_link['rect']['ax'][z][i + 1][:2:])
+                # self.IDs['tower']['ellipse']['ax'].append(object_id)
 
         # ___wheels___
-        for i in range(0, len(figure_link['wheels']['points'])):
-            points = [
-                        [figure_link['wheels']['points'][i][0] - figure_link['wheels']['radius'] * abs(figure_link['kx']), figure_link['wheels']['points'][i][1] - figure_link['wheels']['radius'] * abs(figure_link['ky'])],
-                        [figure_link['wheels']['points'][i][0] + figure_link['wheels']['radius'] * abs(figure_link['kx']), figure_link['wheels']['points'][i][1] + figure_link['wheels']['radius'] * abs(figure_link['ky'])]
-                    ]
-            object_id = self.figure_circle_create(points[0], points[1])
-            # self.IDs['wheels']['points'].append(object_id)
+        for z in range(len(figure_link['wheels']['ax'])):
+            for i in range(len(figure_link['wheels']['ax'][z]) - 1):
+                object_id = self.figure_line_create(figure_link['wheels']['ax'][z][i][:2:], figure_link['wheels']['ax'][z][i + 1][:2:])
+                # self.IDs['tower']['ellipse']['ax'].append(object_id)
         
         # ___tower___
         for i in range(len(figure_link['tower']['points']) - 1):
@@ -422,6 +408,7 @@ class MainApplication:
                 self.canvas_clear()
                 self.figure_draw()
             case 'default':
+                self.action_stack.stack_clear()
                 self.figure.default()
                 self.figure.move(DEFAULT_CENTER_X, DEFAULT_CENTER_Y) # Смещаем к центру холста canvas
 
