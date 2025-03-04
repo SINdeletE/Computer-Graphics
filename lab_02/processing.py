@@ -12,6 +12,9 @@ STEPS = 360
 DEFAULT_ELLIPSE_A = 6
 DEFAULT_ELLIPSE_B = 1
 
+DEFAULT_CENTER_X = 1400 / 2
+DEFAULT_CENTER_Y = 1400 / 2
+
 FST_Y = math.sqrt(3) / 2
 LST_Y = math.sqrt(20) / 6
 
@@ -139,6 +142,11 @@ def figure_action(figure: dict, process_matrix_get, **kwargs):
     except Exception:
         pass
 
+    try:
+        center = kwargs['center']
+    except Exception:
+        center = [0, 0]
+
     for i in range(len(new_figure['rect']['points'])):
         new_figure['rect']['points'][i] = numpy.dot(                \
                                         new_figure['rect']['points'][i],    \
@@ -223,12 +231,12 @@ class Figure:
     def move(self, move_x: float, move_y: float):
         self.figure = figure_action(self.figure, move_matrix_get, x=move_x, y=move_y)
 
-    def scale(self, scale_kx: float, scale_ky: float):
+    def scale(self, scale_kx: float, scale_ky: float, x, y):
         center = self.figure['center']
 
-        self.figure = figure_action(self.figure, move_matrix_get, x=-center[0], y=-center[1])
+        self.figure = figure_action(self.figure, move_matrix_get, x=-x, y=-y)
         self.figure = figure_action(self.figure, scale_matrix_get, kx=scale_kx, ky=scale_ky)
-        self.figure = figure_action(self.figure, move_matrix_get, x=center[0], y=center[1])
+        self.figure = figure_action(self.figure, move_matrix_get, x=x, y=y)
 
     def rotate(self, rotate_angle: float):
         self.figure['angle'] += rotate_angle # Добавляем угол к нынешнему
@@ -237,8 +245,17 @@ class Figure:
         center = self.figure['center']
 
         self.figure = figure_action(self.figure, move_matrix_get, x=-center[0], y=-center[1])
-        self.figure = figure_action(self.figure, rotate_matrix_get, rad=angle_to_rad(rotate_angle))
+        self.figure = figure_action(self.figure, rotate_matrix_get, rad=angle_to_rad(rotate_angle), center=[0, 0])
         self.figure = figure_action(self.figure, move_matrix_get, x=center[0], y=center[1])
+    def rotate_center(self, rotate_angle: float, x, y):
+        self.figure['angle'] += rotate_angle # Добавляем угол к нынешнему
+        self.figure['angle'] %= 360
+
+        rotate_center = [x, y]
+
+        self.figure = figure_action(self.figure, move_matrix_get, x=-rotate_center[0], y=-rotate_center[1])
+        self.figure = figure_action(self.figure, rotate_matrix_get, rad=angle_to_rad(rotate_angle))
+        self.figure = figure_action(self.figure, move_matrix_get, x=rotate_center[0], y=rotate_center[1])
     
     def get(self):
         return self.figure

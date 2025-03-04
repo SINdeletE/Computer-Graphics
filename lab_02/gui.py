@@ -29,10 +29,8 @@ VERTICAL_LEVEL_4 = (VERTICAL_SPACE * (3 + 1) + BUTTON_WIDTH * 3) / MAIN_WIDTH
 
 #___DRAW___
 FIGURE_COLOR = 'blue'
+FIGURE_POINT_COLOR = 'red'
 FIGURE_BORDER_WIDTH = 4
-
-DEFAULT_CENTER_X = CANVAS_WIDTH / 2
-DEFAULT_CENTER_Y = CANVAS_HEIGHT / 2
 
 def is_int(text: str) -> bool:
     try:
@@ -105,13 +103,14 @@ class MainApplication:
         self.widgets_task_button()
         self.widgets_move()
         self.widgets_scale()
-        self.widgets_rotate()
+        # self.widgets_rotate()
         self.widgets_default()
         self.widgets_action_cancel()
+        self.widgets_rotate_center()
 
         # Класс фигуры
         self.figure = pcs.Figure()
-        self.figure.move(DEFAULT_CENTER_X, DEFAULT_CENTER_Y) # Смещаем к центру холста canvas
+        self.figure.move(pcs.DEFAULT_CENTER_X, pcs.DEFAULT_CENTER_Y) # Смещаем к центру холста canvas
 
         # Стек из действий
         self.action_stack = Stack()
@@ -153,7 +152,7 @@ class MainApplication:
 
         entered = self.move_x_entry.get()
         if not(is_float(entered)):
-            self.error_msg("Неправильное значение X")
+            self.error_msg("Неправильное значение dX")
 
             return False
 
@@ -161,7 +160,7 @@ class MainApplication:
         
         entered = self.move_y_entry.get()
         if not(is_float(entered)):
-            self.error_msg("Неправильное значение Y")
+            self.error_msg("Неправильное значение dY")
 
             return False
         
@@ -175,20 +174,20 @@ class MainApplication:
         return True
 
     def widgets_move(self):
-        self.move_x_label = tk.Label(self.root, text='X:', width=2)
-        self.move_x_label.place(relx=0.000, rely=0.05)
+        self.move_x_label = tk.Label(self.root, text='dX:', width=2)
+        self.move_x_label.place(relx=0.000, rely=0.00)
 
         self.move_x_entry = tk.Entry(self.root, width=ENTRY_WIDTH)
-        self.move_x_entry.place(relx=VERTICAL_LEVEL_1, rely=0.05)
+        self.move_x_entry.place(relx=VERTICAL_LEVEL_1, rely=0.00)
 
-        self.move_y_label = tk.Label(self.root, text='Y:', width=2)
-        self.move_y_label.place(relx=0.121, rely=0.05)
+        self.move_y_label = tk.Label(self.root, text='dY:', width=2)
+        self.move_y_label.place(relx=0.121, rely=0.00)
 
         self.move_y_entry = tk.Entry(self.root, width=ENTRY_WIDTH)
-        self.move_y_entry.place(relx=VERTICAL_LEVEL_2, rely=0.05)
+        self.move_y_entry.place(relx=VERTICAL_LEVEL_2, rely=0.00)
 
-        self.move_button = tk.Button(self.root, text="Переместить", command=self.widget_move)
-        self.move_button.place(relx=VERTICAL_LEVEL_3, rely=0.05, width=BUTTON_WIDTH)
+        self.move_button = tk.Button(self.root, text="Перенос", command=self.widget_move)
+        self.move_button.place(relx=VERTICAL_LEVEL_3, rely=0.00, width=BUTTON_WIDTH)
 
     # ___SCALE___
     
@@ -222,14 +221,48 @@ class MainApplication:
 
             return False
         
-        self.figure_event('scale', kx=scale_kx, ky=scale_ky)
-        self.action_stack.stack_push(['scale', [scale_kx, scale_ky]])
+        move_x = 0
+        move_y = 0
+
+        entered = self.center_scale_kx_entry.get()
+        if not(is_float(entered)):
+            self.error_msg("Неправильное значение X")
+
+            return False
+
+        move_x = float(entered)
+        
+        entered = self.center_scale_ky_entry.get()
+        if not(is_float(entered)):
+            self.error_msg("Неправильное значение Y")
+
+            return False
+        
+        move_y = float(entered)
+        
+        self.figure_event('scale', kx=scale_kx, ky=scale_ky, x=move_x, y=move_y)
+        self.action_stack.stack_push(['scale', [scale_kx, scale_ky, move_x, move_y]])
 
         self.error_msg("*Масштабирование*")
 
         return True
 
     def widgets_scale(self):
+        self.center_scale_x_label = tk.Label(self.root, text='X:', width=2)
+        self.center_scale_x_label.place(relx=0.000, rely=0.05)
+
+        self.center_scale_kx_entry = tk.Entry(self.root, width=ENTRY_WIDTH)
+        self.center_scale_kx_entry.place(relx=VERTICAL_LEVEL_1, rely=0.05)
+
+        self.center_scale_y_label = tk.Label(self.root, text='Y:', width=2)
+        self.center_scale_y_label.place(relx=0.121, rely=0.05)
+
+        self.center_scale_ky_entry = tk.Entry(self.root, width=ENTRY_WIDTH)
+        self.center_scale_ky_entry.place(relx=VERTICAL_LEVEL_2, rely=0.05)
+
+        self.msg_scale_label = tk.Label(self.root, text='<- Центр масштабирования', width=25)
+        self.msg_scale_label.place(relx=VERTICAL_LEVEL_3, rely=0.05)
+
         self.scale_x_label = tk.Label(self.root, text='kx:', width=2)
         self.scale_x_label.place(relx=0.000, rely=0.10)
 
@@ -284,7 +317,7 @@ class MainApplication:
 
     def widgets_default(self):
         self.default_button = tk.Button(self.root, text="Восстановить", command=self.widget_default)
-        self.default_button.place(relx=VERTICAL_LEVEL_1, rely=0.20, width=BUTTON_WIDTH * 2)
+        self.default_button.place(relx=VERTICAL_LEVEL_1, rely=0.25, width=BUTTON_WIDTH * 2)
 
     # ___CANCEL_LAST_ACTION___
 
@@ -303,10 +336,13 @@ class MainApplication:
                 self.figure_event('move', x=-kwargs[0], y=-kwargs[1])
 
             case 'scale':
-                self.figure_event('scale', kx=1 / kwargs[0], ky=1 / kwargs[1])
+                self.figure_event('scale', kx=1 / kwargs[0], ky=1 / kwargs[1], x=kwargs[2], y=kwargs[3])
 
             case 'rotate':
                 self.figure_event('rotate', angle=-kwargs[0])
+
+            case 'rotate center':
+                self.figure_event('rotate center', angle=-kwargs[0], x=kwargs[1], y=kwargs[2])
 
         self.error_msg("*Отмена*")
 
@@ -314,7 +350,67 @@ class MainApplication:
 
     def widgets_action_cancel(self):
         self.default_button = tk.Button(self.root, text="Отменить предыдущее действие", command=self.widget_action_cancel)
-        self.default_button.place(relx=VERTICAL_LEVEL_1, rely=0.25, width=BUTTON_WIDTH * 2)
+        self.default_button.place(relx=VERTICAL_LEVEL_1, rely=0.30, width=BUTTON_WIDTH * 2)
+    
+    # ___ROTATE_CENTER___
+
+    def widget_rotate_center(self):
+        rotate_angle = 0
+        center_x = 0
+        center_y = 0
+
+        entered = self.rotate_center_angle_entry.get()
+        if not(is_float(entered)):
+            self.error_msg("Неправильное значение k")
+
+            return False
+
+        rotate_angle = float(entered)
+
+        entered = self.rotate_center_x_entry.get()
+        if not(is_float(entered)):
+            self.error_msg("Неправильное значение X")
+
+            return False
+
+        center_x = float(entered)
+        
+        entered = self.rotate_center_y_entry.get()
+        if not(is_float(entered)):
+            self.error_msg("Неправильное значение Y")
+
+            return False
+        
+        center_y = float(entered)
+        
+        self.figure_event('rotate center', angle=rotate_angle, x=center_x, y=center_y)
+        self.action_stack.stack_push(['rotate center', [rotate_angle, center_x, center_y]])
+
+        self.error_msg("*Поворот*")
+
+        return True
+    
+    def widgets_rotate_center(self):
+        self.rotate_center_angle_label = tk.Label(self.root, text='°:', width=2)
+        self.rotate_center_angle_label.place(relx=0.003, rely=0.20)
+
+        self.rotate_center_angle_entry = tk.Entry(self.root, width=ENTRY_WIDTH)
+        self.rotate_center_angle_entry.place(relx=VERTICAL_LEVEL_1, rely=0.20)
+
+        self.rotate_center_x_label = tk.Label(self.root, text='X:', width=2)
+        self.rotate_center_x_label.place(relx=0.121, rely=0.20)
+
+        self.rotate_center_x_entry = tk.Entry(self.root, width=ENTRY_WIDTH)
+        self.rotate_center_x_entry.place(relx=VERTICAL_LEVEL_2, rely=0.20)
+
+        self.rotate_center_y_label = tk.Label(self.root, text='Y:', width=2)
+        self.rotate_center_y_label.place(relx=0.242, rely=0.20)
+
+        self.rotate_center_y_entry = tk.Entry(self.root, width=ENTRY_WIDTH)
+        self.rotate_center_y_entry.place(relx=VERTICAL_LEVEL_3, rely=0.20)
+
+        self.rotate_center_button = tk.Button(self.root, text="Повернуть", command=self.widget_rotate_center)
+        self.rotate_center_button.place(relx=VERTICAL_LEVEL_4, rely=0.20, width=BUTTON_WIDTH)
 
     # ___CANVAS___
 
@@ -371,6 +467,12 @@ class MainApplication:
             object_id = self.figure_line_create(figure_link['tube']['points'][i][:2:], figure_link['tube']['points'][i + 1][:2:])
             # self.IDs['tube']['points'].append(object_id)
 
+        pts = [[figure_link['center'][0] - 5, figure_link['center'][1] + 5],
+                [figure_link['center'][0] + 5, figure_link['center'][1] - 5]]
+        object_id = self.figure_circle_create(*pts)
+        
+        object_id = self.canvas.create_text(*figure_link['center'][:2:], text=f"({figure_link['center'][0]:.3f}, {figure_link['center'][1]:.3f})")
+
     def figure_line_create(self, p1: list, p2: list):
         object_id = self.canvas.create_line(*p1, *p2, fill=FIGURE_COLOR, width=FIGURE_BORDER_WIDTH)
         
@@ -382,7 +484,7 @@ class MainApplication:
         return object_id
 
     def figure_circle_create(self, p_left_up: list, p_right_down: list):
-        object_id = self.canvas.create_oval(*p_left_up, *p_right_down, outline=FIGURE_COLOR, width=FIGURE_BORDER_WIDTH)
+        object_id = self.canvas.create_oval(*p_left_up, *p_right_down, outline=FIGURE_POINT_COLOR, width=FIGURE_BORDER_WIDTH)
         
         return object_id
 
@@ -391,13 +493,13 @@ class MainApplication:
     def figure_event(self, event: str, **kwargs):
         match event:
             case 'move':
-                self.figure.move(kwargs['x'], -kwargs['y'])
+                self.figure.move(kwargs['x'], kwargs['y'])
 
                 self.canvas_clear()
                 self.figure_draw()
             
             case 'scale':
-                self.figure.scale(kwargs['kx'], kwargs['ky'])
+                self.figure.scale(kwargs['kx'], kwargs['ky'], kwargs['x'], kwargs['y'])
 
                 self.canvas_clear()
                 self.figure_draw()
@@ -410,7 +512,12 @@ class MainApplication:
             case 'default':
                 self.action_stack.stack_clear()
                 self.figure.default()
-                self.figure.move(DEFAULT_CENTER_X, DEFAULT_CENTER_Y) # Смещаем к центру холста canvas
+                self.figure.move(pcs.DEFAULT_CENTER_X, pcs.DEFAULT_CENTER_Y) # Смещаем к центру холста canvas
+
+                self.canvas_clear()
+                self.figure_draw()
+            case 'rotate center':
+                self.figure.rotate_center(kwargs['angle'], kwargs['x'], kwargs['y'])
 
                 self.canvas_clear()
                 self.figure_draw()
