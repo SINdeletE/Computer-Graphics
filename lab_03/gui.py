@@ -7,6 +7,8 @@ from tkinter.colorchooser import askcolor
 import PIL
 from PIL import ImageTk, Image, ImageDraw
 
+import logic
+
 MAIN_HEIGHT = 1920
 MAIN_WIDTH = 3000
 
@@ -34,52 +36,61 @@ class MainWindow:
 
     # __WIDGET__
 
-    def algorithm_label_set(self):
+    def algorithm_set(self):
         algo_str = ""
 
         match self.algorithm.get():
             case 1:
                 algo_str = "ЦДА"
+                self.algorithm_func = logic.DrawDDA
             case 2:
                 algo_str = "ЦДА (со сглаж.)"
+                self.algorithm_func = logic.DrawDDA
             case 3:
                 algo_str = "Алгоритм Ву"
+                self.algorithm_func = logic.DrawDDA
             case 4:
                 algo_str = "Брезенхем"
+                self.algorithm_func = logic.DrawBRESENHAM
             case 5:
                 algo_str = "Брезенхем (со сглаж.)"
+                self.algorithm_func = logic.DrawDDA
             case 6:
                 algo_str = "Библиотечный"
+                self.algorithm_func = logic.DrawLIB
             case _:
                 algo_str = "?"
+                self.algorithm_func = None
 
         self.algorithm_label.config(text=f"Выбрано: {algo_str}")
 
     def widget_radiobuttons(self):
         self.algorithm = tk.IntVar()
+        self.algorithm_func = None
 
         self.algorithm_label = ttk.Label(text="Выбрано: ЦДА", font=DEFAULT_FONT)
         self.algorithm_label.place(relx=VERTICAL_LEVEL_1, rely=0.05)
 
-        self.CDA_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="ЦДА", variable=self.algorithm, value=CDA, command=self.algorithm_label_set)
+        self.CDA_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="ЦДА", variable=self.algorithm, value=CDA, command=self.algorithm_set)
         self.CDA_radiobutton.place(relx=VERTICAL_LEVEL_1, rely=0.10)
 
-        self.CDA_SMOOTH_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="ЦДА (со сглаж.)", variable=self.algorithm, value=CDA_SMOOTH, command=self.algorithm_label_set)
+        self.CDA_SMOOTH_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="ЦДА (со сглаж.)", variable=self.algorithm, value=CDA_SMOOTH, command=self.algorithm_set)
         self.CDA_SMOOTH_radiobutton.place(relx=VERTICAL_LEVEL_1, rely=0.15)
 
-        self.WU_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="Алгоритм Ву", variable=self.algorithm, value=WU, command=self.algorithm_label_set)
+        self.WU_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="Алгоритм Ву", variable=self.algorithm, value=WU, command=self.algorithm_set)
         self.WU_radiobutton.place(relx=VERTICAL_LEVEL_1, rely=0.20)
 
-        self.BRESENHAM_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="Брезенхем", variable=self.algorithm, value=BRESENHAM, command=self.algorithm_label_set)
+        self.BRESENHAM_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="Брезенхем", variable=self.algorithm, value=BRESENHAM, command=self.algorithm_set)
         self.BRESENHAM_radiobutton.place(relx=VERTICAL_LEVEL_3, rely=0.10)
 
-        self.BRESENHAM_SMOOTH_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="Брезенхем (со сглаж.)", variable=self.algorithm, value=BRESENHAM_SMOOTH, command=self.algorithm_label_set)
+        self.BRESENHAM_SMOOTH_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="Брезенхем (со сглаж.)", variable=self.algorithm, value=BRESENHAM_SMOOTH, command=self.algorithm_set)
         self.BRESENHAM_SMOOTH_radiobutton.place(relx=VERTICAL_LEVEL_3, rely=0.15)
 
-        self.LIB_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="Библиотечный", variable=self.algorithm, value=LIB, command=self.algorithm_label_set)
+        self.LIB_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="Библиотечный", variable=self.algorithm, value=LIB, command=self.algorithm_set)
         self.LIB_radiobutton.place(relx=VERTICAL_LEVEL_3, rely=0.20)
 
         self.CDA_radiobutton.select()
+        self.algorithm_func = logic.DrawDDA
 
     def color_set(self):
         self.color = askcolor()[1]
@@ -92,17 +103,53 @@ class MainWindow:
         self.color_label.place(relx=VERTICAL_LEVEL_3, rely=0.05)
 
         self.color_button = tk.Button(self.root, text="Выбрать цвет", width=DEFAULT_BUTTON_SIZE, command=self.color_set)
-        self.color_button.place(relx=VERTICAL_LEVEL_1, rely=0.25)
+        self.color_button.place(relx=VERTICAL_LEVEL_1, rely=0.30)
+
+    # ___LEVEL_1___
+
+    def draw_line(self):
+        if self.algorithm_func is None:
+            self.result_msg("Нет функции для отрисовки")
+
+            return
+
+        code = self.algorithm_func(self.draw, 0, 0, 500, 500, self.color, [CANVAS_WIDTH, CANVAS_HEIGHT])
+        if code == logic.ERR_COLOR:
+            self.result_msg("Нет цвета для отрисовки")
+        elif code == logic.ERR_RESOLUTION:
+            self.result_msg("Прямая не лежит в видимой области")
+        else:
+            self.canvas_image_submit()
+            self.result_msg("Прямая отрисована успешно")
+
+    def widget_draw_button(self):
+        self.color_button = tk.Button(self.root, text="Рисовать", width=DEFAULT_BUTTON_SIZE, command=self.draw_line)
+        self.color_button.place(relx=VERTICAL_LEVEL_3, rely=0.30)
+
+    def widget_clean_button(self):
+        self.color_button = tk.Button(self.root, text="Очистить", width=DEFAULT_BUTTON_SIZE, command=self.canvas_clear)
+        self.color_button.place(relx=VERTICAL_LEVEL_3, rely=0.35)
 
     def widget_level_1(self):
         self.level_1_label = tk.Label(self.root, font=DEFAULT_FONT, text="I часть")
         self.level_1_label.place(relx=VERTICAL_LEVEL_3, rely=0.0)
 
         self.widget_radiobuttons()
+        self.widget_draw_button()
+        self.widget_clean_button()
 
     def widget_canvas(self):
         self.canvas = tk.Canvas(self.root, bg='white', height=CANVAS_HEIGHT, width=CANVAS_WIDTH)
         self.canvas.pack(anchor='w')
+
+        self.canvas_image()
+
+    def result_msg(self, stroke: str):
+        self.result_label.config(text=f"Результат: {stroke}")
+
+    def widget_result(self):
+        self.result_label = tk.Label(self.root, font=DEFAULT_FONT, text="")
+        self.result_label.place(relx=VERTICAL_LEVEL_1, rely=0.95)
 
     # ___CANVAS___
 
@@ -124,21 +171,14 @@ class MainWindow:
         # Отображаем изображение на Canvas
         self.canvas.create_image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, image=self.image)
 
-    # ___DRAW___
-
-    def draw_line_pillow_lib(self, coords):
-        # Рисуем линию на изображении
-        self.draw.line(coords, fill=(128, 128, 128, 255), width=1)
-
-        self.canvas_image_submit()
-
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Лабораторная работа №3")
         self.root.geometry(f"{MAIN_WIDTH}x{MAIN_HEIGHT}")
 
+        self.widget_canvas()
         self.widget_level_1()
         self.widget_color_button()
-        self.widget_canvas()
+        self.widget_result()
 
 
