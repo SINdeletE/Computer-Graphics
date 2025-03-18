@@ -29,7 +29,7 @@ BRESENHAM = 4
 BRESENHAM_SMOOTH = 5
 LIB = 6
 
-DEFAULT_FONT = 27
+DEFAULT_FONT = 24
 DEFAULT_WIDGET_SIZE = 25
 DEFAULT_ENTRY_SIZE = 10
 DEFAULT_LABEL_SHIFT = 40 / MAIN_WIDTH
@@ -72,7 +72,7 @@ class MainWindow:
                 self.algorithm_func = logic.DrawBRESENHAM
             case 5:
                 algo_str = "Брезенхем (со сглаж.)"
-                self.algorithm_func = logic.DrawDDA
+                self.algorithm_func = logic.DrawBRESENHAM_SMOOTH
             case 6:
                 algo_str = "Библиотечный"
                 self.algorithm_func = logic.DrawLIB
@@ -179,10 +179,10 @@ class MainWindow:
         if code == logic.ERR_COLOR:
             self.result_msg("Нет цвета для отрисовки")
         elif code == logic.ERR_RESOLUTION:
-            self.result_msg("Прямая не лежит в видимой области")
+            self.result_msg("Отрезок не лежит в видимой области")
         else:
             self.canvas_image_submit()
-            self.result_msg("Прямая отрисована успешно")
+            self.result_msg("Отрезок отрисована успешно")
 
     def widget_draw_coords(self):
         self.x0_label = tk.Label(self.root, font=DEFAULT_FONT, text="x0")
