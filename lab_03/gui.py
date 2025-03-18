@@ -30,7 +30,25 @@ BRESENHAM_SMOOTH = 5
 LIB = 6
 
 DEFAULT_FONT = 27
-DEFAULT_BUTTON_SIZE = 25
+DEFAULT_WIDGET_SIZE = 25
+DEFAULT_ENTRY_SIZE = 10
+DEFAULT_LABEL_SHIFT = 40 / MAIN_WIDTH
+
+def is_int(text: str) -> bool:
+    try:
+        int(text)
+    except Exception:
+        return False
+
+    return True
+
+def is_float(text: str) -> bool:
+    try:
+        float(text)
+    except Exception:
+        return False
+
+    return True
 
 class MainWindow:
 
@@ -48,7 +66,7 @@ class MainWindow:
                 self.algorithm_func = logic.DrawDDA
             case 3:
                 algo_str = "Алгоритм Ву"
-                self.algorithm_func = logic.DrawDDA
+                self.algorithm_func = logic.DrawWU
             case 4:
                 algo_str = "Брезенхем"
                 self.algorithm_func = logic.DrawBRESENHAM
@@ -102,7 +120,7 @@ class MainWindow:
         self.color_label = tk.Label(self.root, font=DEFAULT_FONT, text="Цвет: Чёрный")
         self.color_label.place(relx=VERTICAL_LEVEL_3, rely=0.05)
 
-        self.color_button = tk.Button(self.root, text="Выбрать цвет", width=DEFAULT_BUTTON_SIZE, command=self.color_set)
+        self.color_button = tk.Button(self.root, text="Выбрать цвет", width=DEFAULT_WIDGET_SIZE, command=self.color_set)
         self.color_button.place(relx=VERTICAL_LEVEL_1, rely=0.30)
 
     # ___LEVEL_1___
@@ -112,8 +130,52 @@ class MainWindow:
             self.result_msg("Нет функции для отрисовки")
 
             return
+        
+        # ------------------------------------
+        
+        x0 = 0
+        y0 = 0
+        x1 = 0
+        y1 = 0
 
-        code = self.algorithm_func(self.draw, 0, 0, 500, 500, self.color, [CANVAS_WIDTH, CANVAS_HEIGHT])
+        entered = self.x0_entry.get()
+        if not(is_float(entered)):
+            self.result_msg("Неправильное значение x0")
+
+            return False
+
+        x0 = float(entered)
+        
+        entered = self.y0_entry.get()
+        if not(is_float(entered)):
+            self.result_msg("Неправильное значение y0")
+
+            return False
+        
+        y0 = float(entered)
+        
+        entered = self.x1_entry.get()
+        if not(is_float(entered)):
+            self.result_msg("Неправильное значение x1")
+
+            return False
+
+        x1 = float(entered)
+        
+        entered = self.y1_entry.get()
+        if not(is_float(entered)):
+            self.result_msg("Неправильное значение y1")
+
+            return False
+        
+        y1 = float(entered)
+    # ------------------------------------
+        
+        if self.algorithm.get() == LIB:
+            code = self.algorithm_func(self.draw, x0, y0, x1, y1, self.color, [CANVAS_WIDTH, CANVAS_HEIGHT])
+        else:
+            code = self.algorithm_func(self.pilImage, x0, y0, x1, y1, self.color, [CANVAS_WIDTH, CANVAS_HEIGHT])
+
         if code == logic.ERR_COLOR:
             self.result_msg("Нет цвета для отрисовки")
         elif code == logic.ERR_RESOLUTION:
@@ -122,12 +184,33 @@ class MainWindow:
             self.canvas_image_submit()
             self.result_msg("Прямая отрисована успешно")
 
+    def widget_draw_coords(self):
+        self.x0_label = tk.Label(self.root, font=DEFAULT_FONT, text="x0")
+        self.x0_label.place(relx=VERTICAL_LEVEL_1 - DEFAULT_LABEL_SHIFT, rely=0.25)
+        self.x0_entry = tk.Entry(self.root, width=DEFAULT_ENTRY_SIZE)
+        self.x0_entry.place(relx=VERTICAL_LEVEL_1, rely=0.25)
+
+        self.y0_label = tk.Label(self.root, font=DEFAULT_FONT, text="y0")
+        self.y0_label.place(relx=VERTICAL_LEVEL_2 - DEFAULT_LABEL_SHIFT, rely=0.25)
+        self.y0_entry = tk.Entry(self.root, width=DEFAULT_ENTRY_SIZE)
+        self.y0_entry.place(relx=VERTICAL_LEVEL_2, rely=0.25)
+
+        self.x1_label = tk.Label(self.root, font=DEFAULT_FONT, text="x1")
+        self.x1_label.place(relx=VERTICAL_LEVEL_3 - DEFAULT_LABEL_SHIFT, rely=0.25)
+        self.x1_entry = tk.Entry(self.root, width=DEFAULT_ENTRY_SIZE)
+        self.x1_entry.place(relx=VERTICAL_LEVEL_3, rely=0.25)
+
+        self.y1_label = tk.Label(self.root, font=DEFAULT_FONT, text="y1")
+        self.y1_label.place(relx=VERTICAL_LEVEL_4 - DEFAULT_LABEL_SHIFT, rely=0.25)
+        self.y1_entry = tk.Entry(self.root, width=DEFAULT_ENTRY_SIZE)
+        self.y1_entry.place(relx=VERTICAL_LEVEL_4, rely=0.25)
+
     def widget_draw_button(self):
-        self.color_button = tk.Button(self.root, text="Рисовать", width=DEFAULT_BUTTON_SIZE, command=self.draw_line)
+        self.color_button = tk.Button(self.root, text="Рисовать", width=DEFAULT_WIDGET_SIZE, command=self.draw_line)
         self.color_button.place(relx=VERTICAL_LEVEL_3, rely=0.30)
 
     def widget_clean_button(self):
-        self.color_button = tk.Button(self.root, text="Очистить", width=DEFAULT_BUTTON_SIZE, command=self.canvas_clear)
+        self.color_button = tk.Button(self.root, text="Очистить", width=DEFAULT_WIDGET_SIZE, command=self.canvas_clear)
         self.color_button.place(relx=VERTICAL_LEVEL_3, rely=0.35)
 
     def widget_level_1(self):
@@ -135,8 +218,15 @@ class MainWindow:
         self.level_1_label.place(relx=VERTICAL_LEVEL_3, rely=0.0)
 
         self.widget_radiobuttons()
+        self.widget_draw_coords()
         self.widget_draw_button()
         self.widget_clean_button()
+
+
+
+    # ___CANVAS___
+
+
 
     def widget_canvas(self):
         self.canvas = tk.Canvas(self.root, bg='white', height=CANVAS_HEIGHT, width=CANVAS_WIDTH)
