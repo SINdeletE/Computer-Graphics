@@ -183,10 +183,15 @@ class MainWindow:
         y1 = float(entered)
     # ------------------------------------
         
-        if self.algorithm.get() == LIB:
-            code = self.algorithm_func(self.draw, x0, y0, x1, y1, self.color, [CANVAS_WIDTH, CANVAS_HEIGHT])
-        else:
-            code = self.algorithm_func(self.pilImage, x0, y0, x1, y1, self.color, [CANVAS_WIDTH, CANVAS_HEIGHT])
+        code = 0
+
+        try:
+            if self.algorithm.get() == LIB:
+                code = self.algorithm_func(self.draw, x0, y0, x1, y1, self.color, [CANVAS_WIDTH, CANVAS_HEIGHT])
+            else:
+                code = self.algorithm_func(self.pilImage, x0, y0, x1, y1, self.color, [CANVAS_WIDTH, CANVAS_HEIGHT])
+        except Exception:
+            self.canvas_image_submit()
 
         if code == logic.ERR_COLOR:
             self.result_msg("Нет цвета для отрисовки")
@@ -194,7 +199,7 @@ class MainWindow:
             self.result_msg("Отрезок не лежит в видимой области")
         else:
             self.canvas_image_submit()
-            self.result_msg("Отрезок отрисована успешно")
+            self.result_msg("Отрезок отрисован успешно")
 
     def widget_draw_coords(self):
         self.x0_label = tk.Label(self.root, font=DEFAULT_FONT, text="x0")
@@ -218,8 +223,8 @@ class MainWindow:
         self.y1_entry.place(relx=VERTICAL_LEVEL_4, rely=0.25)
 
     def widget_draw_button(self):
-        self.color_button = tk.Button(self.root, text="Рисовать", width=DEFAULT_WIDGET_SIZE, command=self.draw_line)
-        self.color_button.place(relx=VERTICAL_LEVEL_3, rely=0.30)
+        self.draw_button = tk.Button(self.root, text="Рисовать", width=DEFAULT_WIDGET_SIZE, command=self.draw_line)
+        self.draw_button.place(relx=VERTICAL_LEVEL_3, rely=0.30)
 
     def widget_clean_button(self):
         self.color_button = tk.Button(self.root, text="Очистить", width=DEFAULT_WIDGET_SIZE, command=self.canvas_clear)
@@ -236,9 +241,85 @@ class MainWindow:
 
 
 
+    # ___LEVEL_2___
+
+    def sun_draw(self):
+        x = 0
+        y = 0
+        L = 0
+
+        entered = self.sun_x_entry.get()
+        if not(is_float(entered)):
+            self.result_msg("Неправильное значение x")
+
+            return False
+
+        x = float(entered)
+        
+        entered = self.sun_y_entry.get()
+        if not(is_float(entered)):
+            self.result_msg("Неправильное значение y")
+
+            return False
+        
+        y = float(entered)
+
+        entered = self.sun_length_entry.get()
+        if not(is_int(entered)) or int(entered) <= 0:
+            self.result_msg("Неправильное значение длины")
+
+            return False
+
+        L = int(entered)
+
+        entered = self.sun_n_entry.get()
+        if not(is_int(entered)) or int(entered) <= 0:
+            self.result_msg("Неправильное значение числа отрезков")
+
+            return False
+
+        n = int(entered)
+
+        if self.algorithm.get() == LIB:
+            code = logic.SunDraw(self.draw, self.algorithm_func, x, y, L, n, self.color, [CANVAS_WIDTH, CANVAS_HEIGHT])
+        else:
+            code = logic.SunDraw(self.pilImage, self.algorithm_func, x, y, L, n, self.color, [CANVAS_WIDTH, CANVAS_HEIGHT])
+        
+        self.canvas_image_submit()
+        
+        return True
+
+    def widget_sun_info(self):
+        self.sun_x_label = tk.Label(self.root, font=DEFAULT_FONT, text="x")
+        self.sun_x_label.place(relx=VERTICAL_LEVEL_1 - DEFAULT_LABEL_SHIFT, rely=0.45)
+        self.sun_x_entry = tk.Entry(self.root, width=DEFAULT_ENTRY_SIZE)
+        self.sun_x_entry.place(relx=VERTICAL_LEVEL_1, rely=0.45)
+
+        self.sun_y_label = tk.Label(self.root, font=DEFAULT_FONT, text="y")
+        self.sun_y_label.place(relx=VERTICAL_LEVEL_2 - DEFAULT_LABEL_SHIFT, rely=0.45)
+        self.sun_y_entry = tk.Entry(self.root, width=DEFAULT_ENTRY_SIZE)
+        self.sun_y_entry.place(relx=VERTICAL_LEVEL_2, rely=0.45)
+
+        self.sun_length_label = tk.Label(self.root, font=DEFAULT_FONT, text="L")
+        self.sun_length_label.place(relx=VERTICAL_LEVEL_3 - DEFAULT_LABEL_SHIFT, rely=0.45)
+        self.sun_length_entry = tk.Entry(self.root, width=DEFAULT_ENTRY_SIZE)
+        self.sun_length_entry.place(relx=VERTICAL_LEVEL_3, rely=0.45)
+
+        self.sun_n_label = tk.Label(self.root, font=DEFAULT_FONT, text="n")
+        self.sun_n_label.place(relx=VERTICAL_LEVEL_4 - DEFAULT_LABEL_SHIFT, rely=0.45)
+        self.sun_n_entry = tk.Entry(self.root, width=DEFAULT_ENTRY_SIZE)
+        self.sun_n_entry.place(relx=VERTICAL_LEVEL_4, rely=0.45)
+
+    def widget_sun_draw_button(self):
+        self.sun_draw_button = tk.Button(self.root, text="Рисовать", width=DEFAULT_WIDGET_SIZE, command=self.sun_draw)
+        self.sun_draw_button.place(relx=VERTICAL_LEVEL_3, rely=0.50)
+
+    def widget_level_2(self):
+        self.widget_sun_info()
+        self.widget_sun_draw_button()
+
+
     # ___CANVAS___
-
-
 
     def widget_canvas(self):
         self.canvas = tk.Canvas(self.root, bg='white', height=CANVAS_HEIGHT, width=CANVAS_WIDTH)
@@ -281,6 +362,7 @@ class MainWindow:
 
         self.widget_background_color_button()
         self.widget_level_1()
+        self.widget_level_2()
         self.widget_canvas()
         self.widget_color_button()
         self.widget_result()

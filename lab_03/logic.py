@@ -1,6 +1,7 @@
 from math import *
 from typing import Type
 from PIL import ImageDraw
+import numpy
 
 EPS = 1e-8
 
@@ -58,6 +59,8 @@ def sign_num(k: float):
 def DrawDDA(DrawModule, x0, y0, x1, y1, color, resolution: list):
     if color is None: return ERR_COLOR
 
+    x0, y0, x1, y1 = xy_swap_by_x(x0, y0, x1, y1)
+
     if resolution_check(x0, y0, resolution) and resolution_check(x1, y1, resolution): 
         return ERR_RESOLUTION
 
@@ -101,29 +104,35 @@ def DrawBRESENHAM_INT(DrawModule, x0, y0, x1, y1, color, resolution: list):
 
     dx = x1 - x0
     dy = y1 - y0
+
+    sign_y = sign_num(dy)
+    sign_x = sign_num(dx)
     
     try:
         sign = sign_num(dy / dx)
     except Exception:
         sign = sign_num(dy * inf)
-    error = 2 * dy - dx
+    error = 2 * dy * sign_y - dx
 
     y = y0
     for x in range(x0, x1 + 1):
-        draw_point(DrawModule, (round(x), round(y)), color)
+        draw_point(DrawModule, (x, y), color)
 
         while y != y1 and not(resolution_raw(x, y, resolution)) and error - 1.0 > EPS:
-            draw_point(DrawModule, (round(x), round(y)), color)
+            draw_point(DrawModule, (x, y), color)
 
-            y += sign
-            error -= 2 * dx
+            y += sign_y
+            if dx < -EPS or dx > EPS:
+                error -= 2 * dx
+            else:
+                error -= 1
             
             if flag and resolution_raw(x, y, resolution):
                 color = RED
         
-        error += 2 * dy
+        error += 2 * dy * sign_y
 
-    draw_point(DrawModule, (round(x1), round(y1)), color)
+    draw_point(DrawModule, (x1, y1), color)
     return 0
 
 def DrawBRESENHAM(DrawModule, x0, y0, x1, y1, color, resolution: list):
@@ -183,15 +192,15 @@ def DrawWU(DrawModule, x0, y0, x1, y1, color, resolution: list):
     x1 = round(x1)
     y1 = round(y1)
 
-    try:
-        k = (y1 - y0) / (x1 - x0)
-    except ZeroDivisionError:
-        k = sign_num(y1 - y0) * inf
-
     x = x0
     y = y0
     if x1 - x0 >= y1 - y0:
         x0, y0, x1, y1 = xy_swap_by_x(x0, y0, x1, y1)
+
+        try:
+            k = (y1 - y0) / (x1 - x0)
+        except ZeroDivisionError:
+            k = sign_num(y1 - y0) * inf
 
         x = x0
         y = y0
@@ -205,13 +214,23 @@ def DrawWU(DrawModule, x0, y0, x1, y1, color, resolution: list):
             if y_main == y_delta:
                 draw_point(DrawModule, (x, y_main), color)
             else:
-                draw_point_alpha(DrawModule, (x, y_delta), color, alpha_y_delta)
-                draw_point_alpha(DrawModule, (x, y_main), color, alpha_y)
+                if alpha_y_delta - alpha_y > -EPS:
+                    draw_point_alpha(DrawModule, (x, y_main), color, alpha_y)
+                    draw_point_alpha(DrawModule, (x, y_delta), color, alpha_y_delta)
+                else:
+                    draw_point_alpha(DrawModule, (x, y_delta), color, alpha_y_delta)
+                    draw_point_alpha(DrawModule, (x, y_main), color, alpha_y)
+
 
             x += 1
             y += k
     else:
         x0, y0, x1, y1 = xy_swap_by_y(x0, y0, x1, y1)
+
+        try:
+            k = (y1 - y0) / (x1 - x0)
+        except ZeroDivisionError:
+            k = sign_num(y1 - y0) * inf
 
         x = x0
         y = y0
@@ -225,8 +244,12 @@ def DrawWU(DrawModule, x0, y0, x1, y1, color, resolution: list):
             if x_main == x_delta:
                 draw_point(DrawModule, (x_main, y), color)
             else:
-                draw_point_alpha(DrawModule, (x_delta, y), color, alpha_x_delta)
-                draw_point_alpha(DrawModule, (x_main, y), color, alpha_x)
+                if alpha_x_delta - alpha_x > -EPS:
+                    draw_point_alpha(DrawModule, (x_main, y), color, alpha_x)
+                    draw_point_alpha(DrawModule, (x_delta, y), color, alpha_x_delta)
+                else:
+                    draw_point_alpha(DrawModule, (x_delta, y), color, alpha_x_delta)
+                    draw_point_alpha(DrawModule, (x_main, y), color, alpha_x)
 
             y += 1
             x += 1 / k
@@ -235,6 +258,8 @@ def DrawWU(DrawModule, x0, y0, x1, y1, color, resolution: list):
 def DrawBRESENHAM_SMOOTH(DrawModule, x0, y0, x1, y1, color, resolution: list):
     if color is None: return ERR_COLOR
 
+    x0, y0, x1, y1 = xy_swap_by_x(x0, y0, x1, y1)
+
     if resolution_check(x0, y0, resolution) and resolution_check(x1, y1, resolution): 
         return ERR_RESOLUTION
     
@@ -242,8 +267,6 @@ def DrawBRESENHAM_SMOOTH(DrawModule, x0, y0, x1, y1, color, resolution: list):
     y0 = round(y0)
     x1 = round(x1)
     y1 = round(y1)
-    
-    x0, y0, x1, y1 = xy_swap_by_x(x0, y0, x1, y1)
 
     dx = x1 - x0
     dy = y1 - y0
@@ -290,3 +313,13 @@ def DrawLIB(DrawModule, x0, y0, x1, y1, color, resolution: list):
     
     DrawModule.line((x0, y0, x1, y1), fill=color, width=1)
 
+def SunDraw(DrawModule, Drawfunc, x, y, L, n, color, resolution: list):
+    angles = list(numpy.linspace(0, 2 * pi, n + 1))
+    
+    for i in range(len(angles) - 1):
+        try:
+            Drawfunc(DrawModule, x, y, x + L * cos(angles[i]), y + L * sin(angles[i]), color, resolution)
+        except Exception:
+            pass
+    
+    return 0
