@@ -23,7 +23,7 @@ VERTICAL_LEVEL_3 = (CANVAS_WIDTH + (MAIN_WIDTH - CANVAS_WIDTH - MAIN_SHIFT) / 4 
 VERTICAL_LEVEL_4 = (CANVAS_WIDTH + (MAIN_WIDTH - CANVAS_WIDTH - MAIN_SHIFT) / 4 * 3) / MAIN_WIDTH
 
 CDA = 1
-CDA_SMOOTH = 2
+BRESENHAM_INT = 2
 WU = 3
 BRESENHAM = 4
 BRESENHAM_SMOOTH = 5
@@ -62,13 +62,13 @@ class MainWindow:
                 algo_str = "ЦДА"
                 self.algorithm_func = logic.DrawDDA
             case 2:
-                algo_str = "ЦДА (со сглаж.)"
-                self.algorithm_func = logic.DrawDDA
+                algo_str = "Брезенхем (для целых)"
+                self.algorithm_func = logic.DrawBRESENHAM_INT
             case 3:
                 algo_str = "Алгоритм Ву"
                 self.algorithm_func = logic.DrawWU
             case 4:
-                algo_str = "Брезенхем"
+                algo_str = "Брезенхем (для действ.)"
                 self.algorithm_func = logic.DrawBRESENHAM
             case 5:
                 algo_str = "Брезенхем (со сглаж.)"
@@ -92,13 +92,13 @@ class MainWindow:
         self.CDA_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="ЦДА", variable=self.algorithm, value=CDA, command=self.algorithm_set)
         self.CDA_radiobutton.place(relx=VERTICAL_LEVEL_1, rely=0.10)
 
-        self.CDA_SMOOTH_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="ЦДА (со сглаж.)", variable=self.algorithm, value=CDA_SMOOTH, command=self.algorithm_set)
-        self.CDA_SMOOTH_radiobutton.place(relx=VERTICAL_LEVEL_1, rely=0.15)
+        self.BRESENHAM_INT_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="Брезенхем (для целых)", variable=self.algorithm, value=BRESENHAM_INT, command=self.algorithm_set)
+        self.BRESENHAM_INT_radiobutton.place(relx=VERTICAL_LEVEL_1, rely=0.15)
 
         self.WU_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="Алгоритм Ву", variable=self.algorithm, value=WU, command=self.algorithm_set)
         self.WU_radiobutton.place(relx=VERTICAL_LEVEL_1, rely=0.20)
 
-        self.BRESENHAM_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="Брезенхем", variable=self.algorithm, value=BRESENHAM, command=self.algorithm_set)
+        self.BRESENHAM_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="Брезенхем (для действ.)", variable=self.algorithm, value=BRESENHAM, command=self.algorithm_set)
         self.BRESENHAM_radiobutton.place(relx=VERTICAL_LEVEL_3, rely=0.10)
 
         self.BRESENHAM_SMOOTH_radiobutton = tk.Radiobutton(self.root, font=DEFAULT_FONT, text="Брезенхем (со сглаж.)", variable=self.algorithm, value=BRESENHAM_SMOOTH, command=self.algorithm_set)
@@ -122,6 +122,18 @@ class MainWindow:
 
         self.color_button = tk.Button(self.root, text="Выбрать цвет", width=DEFAULT_WIDGET_SIZE, command=self.color_set)
         self.color_button.place(relx=VERTICAL_LEVEL_1, rely=0.30)
+
+    def background_color_set(self):
+        self.background_color = askcolor()[1]
+
+        self.canvas_clear() # Обновление цвета
+        
+
+    def widget_background_color_button(self):
+        self.background_color = "#FFFFFF"
+
+        self.background_color_button = tk.Button(self.root, text="Выбрать цвет фона", width=DEFAULT_WIDGET_SIZE, command=self.background_color_set)
+        self.background_color_button.place(relx=VERTICAL_LEVEL_1, rely=0.35)
 
     # ___LEVEL_1___
 
@@ -233,6 +245,7 @@ class MainWindow:
         self.canvas.pack(anchor='w')
 
         self.canvas_image()
+        self.canvas_image_submit()
 
     def result_msg(self, stroke: str):
         self.result_label.config(text=f"Результат: {stroke}")
@@ -245,7 +258,7 @@ class MainWindow:
 
     def canvas_image(self):
         # Создаем новое изображение с зеленым фоном
-        self.pilImage = Image.new("RGBA", (CANVAS_WIDTH, CANVAS_HEIGHT), "white")
+        self.pilImage = Image.new("RGBA", (CANVAS_WIDTH, CANVAS_HEIGHT), self.background_color)
 
         # Создаем объект ImageDraw для рисования на изображении
         self.draw = ImageDraw.Draw(self.pilImage)
@@ -266,8 +279,9 @@ class MainWindow:
         self.root.title("Лабораторная работа №3")
         self.root.geometry(f"{MAIN_WIDTH}x{MAIN_HEIGHT}")
 
-        self.widget_canvas()
+        self.widget_background_color_button()
         self.widget_level_1()
+        self.widget_canvas()
         self.widget_color_button()
         self.widget_result()
 

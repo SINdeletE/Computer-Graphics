@@ -84,6 +84,48 @@ def DrawDDA(DrawModule, x0, y0, x1, y1, color, resolution: list):
 
     return 0
 
+def DrawBRESENHAM_INT(DrawModule, x0, y0, x1, y1, color, resolution: list):
+    if color is None: return ERR_COLOR
+
+    x0, y0, x1, y1 = xy_swap_by_x(x0, y0, x1, y1)
+
+    if resolution_check(x0, y0, resolution) and resolution_check(x1, y1, resolution): 
+        return ERR_RESOLUTION
+    
+    flag = resolution_check(x0, y0, resolution) or resolution_check(x1, y1, resolution)
+    
+    x0 = round(x0)
+    y0 = round(y0)
+    x1 = round(x1)
+    y1 = round(y1)
+
+    dx = x1 - x0
+    dy = y1 - y0
+    
+    try:
+        sign = sign_num(dy / dx)
+    except Exception:
+        sign = sign_num(dy * inf)
+    error = 2 * dy - dx
+
+    y = y0
+    for x in range(x0, x1 + 1):
+        draw_point(DrawModule, (round(x), round(y)), color)
+
+        while y != y1 and not(resolution_raw(x, y, resolution)) and error - 1.0 > EPS:
+            draw_point(DrawModule, (round(x), round(y)), color)
+
+            y += sign
+            error -= 2 * dx
+            
+            if flag and resolution_raw(x, y, resolution):
+                color = RED
+        
+        error += 2 * dy
+
+    draw_point(DrawModule, (round(x1), round(y1)), color)
+    return 0
+
 def DrawBRESENHAM(DrawModule, x0, y0, x1, y1, color, resolution: list):
     if color is None: return ERR_COLOR
 
