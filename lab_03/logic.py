@@ -194,7 +194,7 @@ def DrawWU(DrawModule, x0, y0, x1, y1, color, resolution: list):
 
     x = x0
     y = y0
-    if x1 - x0 >= y1 - y0:
+    if abs(x1 - x0) >= abs(y1 - y0):
         x0, y0, x1, y1 = xy_swap_by_x(x0, y0, x1, y1)
 
         try:
@@ -258,52 +258,66 @@ def DrawWU(DrawModule, x0, y0, x1, y1, color, resolution: list):
 def DrawBRESENHAM_SMOOTH(DrawModule, x0, y0, x1, y1, color, resolution: list):
     if color is None: return ERR_COLOR
 
-    x0, y0, x1, y1 = xy_swap_by_x(x0, y0, x1, y1)
-
     if resolution_check(x0, y0, resolution) and resolution_check(x1, y1, resolution): 
         return ERR_RESOLUTION
     
-    x0 = round(x0)
-    y0 = round(y0)
-    x1 = round(x1)
-    y1 = round(y1)
-
     dx = x1 - x0
     dy = y1 - y0
-    SX = sign_num(dx)
-    SY = sign_num(dy)
 
-    k = abs(dx / dy)
-    if k - 1 <= EPS:
-        flag = False
-    else:
-        dx, dy = dy, dx
+    if abs(dx) - abs(dy) > -EPS:
+        x0, y0, x1, y1 = xy_swap_by_x(x0, y0, x1, y1)
 
-        k = 1 / k
-        flag = True
-    
-    error = 0.5
-    W = 255 - k
+        x = round(x0)
+        y = round(y0)
+        dx = x1 - x0
+        dy = y1 - y0
 
-    x = x0
-    y = y0
-    draw_point(DrawModule, (x, y), color)
+        sign_x = sign_num(dx)
+        sign_y = sign_num(dy)
 
-    for i in range(dx + 1):
-        if error < W:
-            if flag:
-                x += SX
+        I = 1
+        m = abs(I * dy / dx)
+        w = abs(I - m)
+        error = abs(I / 2)
+
+        draw_point_alpha(DrawModule, (x, y), color, m / 2)    
+        while x - x1 < EPS:
+            if error < w:
+                x += sign_x
+                error += m
             else:
-                y += SY
-            
-            error += k
-        else:
-            x += SX
-            y += SY
+                x += sign_x
+                y += sign_y
+                error -= w
+            draw_point_alpha(DrawModule, (x, y), color, error)
+    else:
+        x0, y0, x1, y1 = xy_swap_by_y(x0, y0, x1, y1)
 
-            error -= W
-        
-        draw_point_alpha(DrawModule, (x, y), color, error)
+        x = round(x0)
+        y = round(y0)
+        dx = x1 - x0
+        dy = y1 - y0
+
+        sign_x = sign_num(dx)
+        sign_y = sign_num(dy)
+
+        I = 1
+        m = abs(I * dx / dy)
+        w = abs(I - m)
+        error = abs(I / 2)
+
+        draw_point_alpha(DrawModule, (x, y), color, m / 2)    
+        while y - y1 < EPS:
+            if error < w:
+                y += sign_y
+                error += m
+            else:
+                x += sign_x
+                y += sign_y
+                error -= w
+            draw_point_alpha(DrawModule, (x, y), color, error)
+
+    return 0
 
 def DrawLIB(DrawModule, x0, y0, x1, y1, color, resolution: list):
     if color is None: return ERR_COLOR
