@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import stat_res as stat
 
 from functools import partial
 from tkinter.colorchooser import askcolor
@@ -265,12 +266,12 @@ class MainWindow:
         y = float(entered)
 
         entered = self.sun_length_entry.get()
-        if not(is_int(entered)) or int(entered) <= 0:
+        if not(is_float(entered)) or float(entered) < logic.EPS:
             self.result_msg("Неправильное значение длины")
 
             return False
 
-        L = int(entered)
+        L = float(entered)
 
         entered = self.sun_n_entry.get()
         if not(is_int(entered)) or int(entered) <= 0:
@@ -318,6 +319,35 @@ class MainWindow:
         self.widget_sun_info()
         self.widget_sun_draw_button()
 
+    # ------------------------
+
+    def stat_get(self):
+        entered = self.stat_length_entry.get()
+        if not(is_float(entered)) or float(entered) < logic.EPS:
+            self.result_msg("Неправильное значение длины")
+
+            return False
+
+        L = float(entered)
+
+        floors_statistics = stat.FloorsStatistics(L)
+        floors_statistics.get()
+
+        return True
+
+    def widget_statistics_entry(self):
+        self.stat_length_label = tk.Label(self.root, font=DEFAULT_FONT, text="L")
+        self.stat_length_label.place(relx=VERTICAL_LEVEL_1 - DEFAULT_LABEL_SHIFT, rely=0.60)
+        self.stat_length_entry = tk.Entry(self.root, width=DEFAULT_ENTRY_SIZE)
+        self.stat_length_entry.place(relx=VERTICAL_LEVEL_1, rely=0.60)
+
+    def widget_statistics_button(self):
+        self.stat_button = tk.Button(self.root, text="Статистика", width=DEFAULT_WIDGET_SIZE, command=self.stat_get)
+        self.stat_button.place(relx=VERTICAL_LEVEL_3, rely=0.60)
+
+    def widget_statistics(self):
+        self.widget_statistics_entry()
+        self.widget_statistics_button()
 
     # ___CANVAS___
 
@@ -366,5 +396,8 @@ class MainWindow:
         self.widget_canvas()
         self.widget_color_button()
         self.widget_result()
+        self.widget_statistics()
+
+
 
 
