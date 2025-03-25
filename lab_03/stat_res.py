@@ -6,6 +6,8 @@ from math import *
 
 import time
 
+DEFAULT_FONT = 20
+
 ITERS = 30
 
 def stat_func_get(func, L):
@@ -47,7 +49,7 @@ class FloorsStatistics:
                         [logic.CountDDA, "ЦДА"],
                         [logic.CountBRESENHAM_INT, "Брезенхем для целых чисел"],
                         [logic.CountWU, "Алгоритм Ву"],
-                        [logic.CountBRESENHAM, "Брезенхем для действительных чисел"],
+                        [logic.CountBRESENHAM, "Брезенхем для действит."],
                         [logic.CountBRESENHAM_SMOOTH, "Брезенхем с устранением ступенчатости"]
                     ]
         
@@ -59,9 +61,9 @@ class FloorsStatistics:
             
             plt.subplot(1, 5, i + 1)
             plt.plot(x, y, 'o')
-            plt.title(self.funcs[i][1])
+            plt.title(self.funcs[i][1], fontsize=DEFAULT_FONT)
         
-        plt.suptitle("Измерение ступенчатости")
+        plt.suptitle("Измерение ступенчатости", fontsize=DEFAULT_FONT)
         plt.show()
 
 class TimeStatistics:
@@ -88,5 +90,5 @@ class TimeStatistics:
             self.times[i] = stat_time_get(self.funcs[i][0], self.x, self.y, self.L, self.n, self.color, self.resolution)
         
         plt.bar(list(map(lambda elem: elem[1], self.funcs)), self.times)
-        plt.title("Измерение времени (в секундах)")
+        plt.title("Измерение времени (в секундах)", fontsize=DEFAULT_FONT)
         plt.show()

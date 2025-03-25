@@ -30,7 +30,7 @@ BRESENHAM = 4
 BRESENHAM_SMOOTH = 5
 LIB = 6
 
-DEFAULT_FONT = 24
+DEFAULT_FONT = 20
 DEFAULT_WIDGET_SIZE = 25
 DEFAULT_ENTRY_SIZE = 10
 DEFAULT_LABEL_SHIFT = 40 / MAIN_WIDTH
@@ -63,16 +63,16 @@ class MainWindow:
                 algo_str = "ЦДА"
                 self.algorithm_func = logic.DrawDDA
             case 2:
-                algo_str = "Брезенхем (для целых)"
+                algo_str = "Брезенхем (целыe)"
                 self.algorithm_func = logic.DrawBRESENHAM_INT
             case 3:
                 algo_str = "Алгоритм Ву"
                 self.algorithm_func = logic.DrawWU
             case 4:
-                algo_str = "Брезенхем (для действ.)"
+                algo_str = "Брезенхем (действ.)"
                 self.algorithm_func = logic.DrawBRESENHAM
             case 5:
-                algo_str = "Брезенхем (со сглаж.)"
+                algo_str = "Брезенхем (сглаж.)"
                 self.algorithm_func = logic.DrawBRESENHAM_SMOOTH
             case 6:
                 algo_str = "Библиотечный"

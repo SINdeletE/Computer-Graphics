@@ -113,7 +113,7 @@ def DrawBRESENHAM_INT(DrawModule, x0, y0, x1, y1, color, resolution: list):
     error = 2 * dy * sign_y - dx
 
     y = y0
-    for x in range(x0, x1): # Тут +1 убрал
+    for x in range(x0, x1 + 1): # Тут +1 убрал
         try:
             draw_point(DrawModule, (x, y), color)
         except Exception:
@@ -196,6 +196,12 @@ def DrawBRESENHAM(DrawModule, x0, y0, x1, y1, color, resolution: list):
                 draw_point(DrawModule, (round(x), round(y)), color)
             except Exception:
                 pass
+    
+    try:
+        draw_point(DrawModule, (x1, y1), color)
+    except Exception:
+        pass
+
     return 0
 
 def DrawWU(DrawModule, x0, y0, x1, y1, color, resolution: list):
