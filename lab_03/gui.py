@@ -186,6 +186,8 @@ class MainWindow:
         
         code = 0
 
+        x0, y0, x1, y1 = logic.check_neg(x0, y0, x1, y1)
+
         try:
             if self.algorithm.get() == LIB:
                 code = self.algorithm_func(self.draw, x0, y0, x1, y1, self.color, [CANVAS_WIDTH, CANVAS_HEIGHT])
@@ -332,6 +334,41 @@ class MainWindow:
 
         floors_statistics = stat.FloorsStatistics(L)
         floors_statistics.get()
+
+        entered = self.sun_x_entry.get()
+        if not(is_float(entered)):
+            self.result_msg("Неправильное значение x")
+
+            return False
+
+        x = float(entered)
+        
+        entered = self.sun_y_entry.get()
+        if not(is_float(entered)):
+            self.result_msg("Неправильное значение y")
+
+            return False
+        
+        y = float(entered)
+
+        entered = self.sun_length_entry.get()
+        if not(is_float(entered)) or float(entered) < logic.EPS:
+            self.result_msg("Неправильное значение длины")
+
+            return False
+
+        L = float(entered)
+
+        entered = self.sun_n_entry.get()
+        if not(is_int(entered)) or int(entered) <= 0:
+            self.result_msg("Неправильное значение числа отрезков")
+
+            return False
+
+        n = int(entered)
+
+        time_statistics = stat.TimeStatistics(x, y, L, n, self.color, [CANVAS_WIDTH, CANVAS_HEIGHT])
+        time_statistics.get()
 
         return True
 

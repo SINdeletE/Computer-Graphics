@@ -72,7 +72,7 @@ def DrawDDA(DrawModule, x0, y0, x1, y1, color, resolution: list):
 
     flag = 1
     i = 0
-    while (flag and i < float(L)):
+    while (flag and i - float(L) < -EPS):
         # if resolution_check(x + dx, y + dy, resolution):
         #     color = RED
         #     flag = 0
@@ -100,8 +100,6 @@ def DrawBRESENHAM_INT(DrawModule, x0, y0, x1, y1, color, resolution: list):
     if resolution_check(x0, y0, resolution) and resolution_check(x1, y1, resolution): 
         return ERR_RESOLUTION
     
-    flag = resolution_check(x0, y0, resolution) or resolution_check(x1, y1, resolution)
-    
     x0 = round(x0)
     y0 = round(y0)
     x1 = round(x1)
@@ -111,20 +109,21 @@ def DrawBRESENHAM_INT(DrawModule, x0, y0, x1, y1, color, resolution: list):
     dy = y1 - y0
 
     sign_y = sign_num(dy)
-    sign_x = sign_num(dx)
     
-    try:
-        sign = sign_num(dy / dx)
-    except Exception:
-        sign = sign_num(dy * inf)
     error = 2 * dy * sign_y - dx
 
     y = y0
-    for x in range(x0, x1 + 1):
-        draw_point(DrawModule, (x, y), color)
-
-        while y != y1 and not(resolution_raw(x, y, resolution)) and error - 1.0 > EPS:
+    for x in range(x0, x1): # Тут +1 убрал
+        try:
             draw_point(DrawModule, (x, y), color)
+        except Exception:
+            pass
+
+        while y != y1 and error - 1.0 > EPS:
+            try:
+                draw_point(DrawModule, (x, y), color)
+            except Exception:
+                pass
 
             y += sign_y
             if dx < -EPS or dx > EPS:
@@ -132,12 +131,16 @@ def DrawBRESENHAM_INT(DrawModule, x0, y0, x1, y1, color, resolution: list):
             else:
                 error -= 1
             
-            if flag and resolution_raw(x, y, resolution):
-                color = RED
+            # if flag and resolution_raw(x, y, resolution):
+            #     color = RED
         
         error += 2 * dy * sign_y
 
-    draw_point(DrawModule, (x1, y1), color)
+    try:
+        draw_point(DrawModule, (x1, y1), color)
+    except Exception:
+        pass
+
     return 0
 
 def DrawBRESENHAM(DrawModule, x0, y0, x1, y1, color, resolution: list):
@@ -164,26 +167,35 @@ def DrawBRESENHAM(DrawModule, x0, y0, x1, y1, color, resolution: list):
     sign = sign_num(k)
     error = 0.0
     
-    draw_point(DrawModule, (round(x0), round(y0)), color)
+    try:
+        draw_point(DrawModule, (round(x0), round(y0)), color)
+    except Exception:
+        pass
 
     y = y0
     for x in range(x0, x1 + 1):
         error += abs_k
 
         if error - 1.0 <= EPS:
-            draw_point(DrawModule, (round(x), round(y)), color)
+            try:
+                draw_point(DrawModule, (round(x), round(y)), color)
+            except Exception:
+                pass
         else:
-            while y != y1 and not(resolution_raw(x, y, resolution)) and error - 1.0 > EPS:
+            while y != y1 and error - 1.0 > EPS:
                 y += sign
 
-                draw_point(DrawModule, (round(x), round(y)), color)
+                try:
+                    draw_point(DrawModule, (round(x), round(y)), color)
+                except Exception:
+                    pass
 
                 error -= 1.0
-            
-            if flag and resolution_raw(x, y, resolution):
-                color = RED
 
-            draw_point(DrawModule, (round(x), round(y)), color)
+            try:
+                draw_point(DrawModule, (round(x), round(y)), color)
+            except Exception:
+                pass
     return 0
 
 def DrawWU(DrawModule, x0, y0, x1, y1, color, resolution: list):
@@ -285,7 +297,11 @@ def DrawBRESENHAM_SMOOTH(DrawModule, x0, y0, x1, y1, color, resolution: list):
         w = abs(I - m)
         error = abs(I / 2)
 
-        draw_point_alpha(DrawModule, (x, y), color, m / 2)    
+        try:
+            draw_point_alpha(DrawModule, (x, y), color, m / 2)  
+        except Exception:
+            pass
+
         while x - x1 < EPS:
             if error < w:
                 x += sign_x
@@ -294,7 +310,10 @@ def DrawBRESENHAM_SMOOTH(DrawModule, x0, y0, x1, y1, color, resolution: list):
                 x += sign_x
                 y += sign_y
                 error -= w
-            draw_point_alpha(DrawModule, (x, y), color, error)
+            try:
+                draw_point_alpha(DrawModule, (x, y), color, error)
+            except Exception:
+                pass
     else:
         x0, y0, x1, y1 = xy_swap_by_y(x0, y0, x1, y1)
 
@@ -311,7 +330,11 @@ def DrawBRESENHAM_SMOOTH(DrawModule, x0, y0, x1, y1, color, resolution: list):
         w = abs(I - m)
         error = abs(I / 2)
 
-        draw_point_alpha(DrawModule, (x, y), color, m / 2)    
+        try:
+            draw_point_alpha(DrawModule, (x, y), color, m / 2)  
+        except Exception:
+            pass
+        
         while y - y1 < EPS:
             if error < w:
                 y += sign_y
@@ -320,7 +343,10 @@ def DrawBRESENHAM_SMOOTH(DrawModule, x0, y0, x1, y1, color, resolution: list):
                 x += sign_x
                 y += sign_y
                 error -= w
-            draw_point_alpha(DrawModule, (x, y), color, error)
+            try:
+                draw_point_alpha(DrawModule, (x, y), color, error)
+            except Exception:
+                pass
 
     return 0
 
@@ -333,30 +359,34 @@ def DrawLIB(DrawModule, x0, y0, x1, y1, color, resolution: list):
     DrawModule.line((x0, y0, x1, y1), fill=color, width=1)
 
 def check_neg(x0, y0, x1, y1):
+    # Обработка отрицательных x0
     if x0 < -EPS:
-        if abs(y1 - y0) > EPS:
-            k = (y0 - y1) / (x0 - x1)
-            y0 = y1 + x1 * k
-        x0 = 0
-
-    if x1 < -EPS:
-        if abs(y1 - y0) > EPS:
+        if abs(x1 - x0) > EPS:
             k = (y1 - y0) / (x1 - x0)
-            y1 = y0 + x0 * k
+            y0 = y1 - k * x1
+        x0 = 0
+    
+    # Обработка отрицательных x1
+    if x1 < -EPS:
+        if abs(x0 - x1) > EPS:
+            k = (y0 - y1) / (x0 - x1)
+            y1 = y0 - k * x0
         x1 = 0
-
+    
+    # Обработка отрицательных y0
     if y0 < -EPS:
         if abs(y1 - y0) > EPS:
-            k =  (x0 - x1) / (y0 - y1)
-            x0 = x1 + y1 * k
+            k_inv = (x1 - x0) / (y1 - y0)
+            x0 = x1 - k_inv * y1
         y0 = 0
-
+    
+    # Обработка отрицательных y1
     if y1 < -EPS:
-        if abs(y1 - y0) > EPS:
-            k = (x1 - x0) / (y1 - y0)
-            x1 = x0 + y0 * k
+        if abs(y0 - y1) > EPS:
+            k_inv = (x0 - x1) / (y0 - y1)
+            x1 = x0 - k_inv * y0
         y1 = 0
-
+    
     return x0, y0, x1, y1
 
 def SunDraw(DrawModule, Drawfunc, x, y, L, n, color, resolution: list):
